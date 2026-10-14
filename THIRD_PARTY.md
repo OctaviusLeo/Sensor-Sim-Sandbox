@@ -52,3 +52,17 @@ body, or success-check ground truth was copied from AgentDojo, InjecAgent, or
 any other third-party source. If the owner later imports task or fixture
 material from a third-party suite during the `[ME]` refinement of task 2.7,
 record its name, version, license, and attribution here.
+
+### M2 Injection_Style / Injected_Goal catalog reuse
+
+The five Injection_Styles (`aib/injections.py`) and the four benign
+Injected_Goals with their deterministic Injection_Success_Checks
+(`aib/goals.py`) are **original authored material** for this repository. The
+three required style ids (`direct`, `fake_system`, `hidden_field`) name
+well-known, generic prompt-injection delivery mechanisms; no payload text,
+goal, or success-check was copied from AgentDojo, InjecAgent, or any other
+third-party source. All injected instructions are benign, sandbox-only actions
+(local `sandbox.local` addresses / sandbox files / sandbox calendar entries) and
+never content-policy-violating output. If the owner borrows attack-style ideas
+from InjecAgent (per the design's fallback option) during the `[ME]` refinement
+of task 3.5, record the name, version, license, and per-idea attribution here.
