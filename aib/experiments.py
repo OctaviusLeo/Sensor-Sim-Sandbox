@@ -10,10 +10,16 @@ At least three repetitions are used where Agent output varies (Req 5.4); each
 repetition gets its own derived seed so repeated draws differ while the whole
 sweep stays reproducible under the top-level ``seed``.
 
-The ``spend_cap_usd`` parameter is accepted here for interface stability; the
-hosted spend-tracking stop logic is extended in FEAT-005. For the local-only
-sweep it is a documented no-op (local models incur no hosted spend), so no Cell
-is skipped on account of spend here.
+Hosted spend tracking (Req 5.2)
+-------------------------------
+When a per-case cost estimate is supplied (``cost_estimator``), the sweep tracks
+estimated Hosted_Model spend and STOPS issuing further hosted requests BEFORE the
+``spend_cap_usd`` would be exceeded: a case whose estimated cost would push the
+running total past the cap is not run, and the sweep stops cleanly, returning the
+records completed so far. The number of fully completed Cells (and the estimated
+spend) is reported via the optional ``stats`` mapping. For a local-only sweep no
+``cost_estimator`` is given (local models incur no hosted spend), so ``spend_cap_usd``
+is a no-op and no Cell is skipped - preserving FEAT-004's behavior exactly.
 
 Results_Store on-disk format (consumed by FEAT-005)
 ---------------------------------------------------
@@ -35,9 +41,13 @@ from aib.injections import InjectionStyle
 from aib.model_client import ModelClient
 from aib.runner import AgentRunner, CaseResult
 from aib.tasks import UserTask
+from typing import Callable, MutableMapping
 
 #: Minimum repetitions for Cells whose Agent output varies (Req 5.4).
 MIN_REPETITIONS: int = 3
+
+#: Type of a per-case hosted-cost estimator: ``(model) -> estimated USD per case``.
+CostEstimator = Callable[[ModelClient], float]
 
 
 @dataclass(frozen=True)
@@ -70,14 +80,23 @@ def run_experiments(
     goals: Sequence[InjectedGoal] | None = None,
     temperature: float = 0.0,
     runner: AgentRunner | None = None,
+    cost_estimator: CostEstimator | None = None,
+    stats: MutableMapping | None = None,
 ) -> list[CaseResult]:
     """Sweep the Cell grid over the User_Tasks, one record per case (Req 5.5).
 
     Produces exactly one :class:`CaseResult` per
     ``(model, defense, style, task, repetition)``. The injected goal paired with
     each style cycles through ``goals`` (or :func:`aib.goals.load_injected_goals`)
-    so every case has a benign Injected_Goal to score. ``spend_cap_usd`` is
-    accepted but not enforced for local-only sweeps (extended in FEAT-005).
+    so every case has a benign Injected_Goal to score.
+
+    Hosted spend tracking (Req 5.2): when ``cost_estimator`` is supplied, before
+    each case the estimated hosted cost of that model is added to a running total;
+    if that would push the total past ``spend_cap_usd`` the case is NOT run and the
+    sweep stops cleanly, returning the records completed so far. When
+    ``cost_estimator`` is ``None`` (local-only sweep) ``spend_cap_usd`` is a no-op.
+    If ``stats`` is given it is populated with ``completed_cells`` (fully completed
+    ``(model, defense, style)`` Cells), ``estimated_spend_usd``, and ``stopped``.
     """
     if goals is None:
         from aib.goals import load_injected_goals
@@ -88,19 +107,41 @@ def run_experiments(
 
     reps = max(repetitions, 1)
     agent = runner or AgentRunner()
+    tools = _default_tools()
 
     results: list[CaseResult] = []
+    estimated_spend = 0.0
+    completed_cells = 0
+    stopped = False
+
     for model in models:
+        if stopped:
+            break
         for defense in defenses:
+            if stopped:
+                break
             for style in styles:
+                if stopped:
+                    break
+                cell_complete = True
                 for task in tasks:
                     # Pair each (style, task) with a benign goal deterministically.
                     goal = goals[len(results) % len(goals)]
                     for rep in range(reps):
+                        # Stop BEFORE issuing a hosted request that would exceed
+                        # the Spend_Cap (Req 5.2).
+                        if cost_estimator is not None and spend_cap_usd is not None:
+                            case_cost = cost_estimator(model)
+                            if estimated_spend + case_cost > spend_cap_usd:
+                                stopped = True
+                                cell_complete = False
+                                break
+                            estimated_spend += case_cost
+
                         rep_seed = _derive_seed(seed, rep)
                         case = agent.run(
                             task=task,
-                            tools=_default_tools(),
+                            tools=tools,
                             defense=defense,
                             style=style,
                             goal=goal,
@@ -109,6 +150,15 @@ def run_experiments(
                             seed=rep_seed,
                         )
                         results.append(replace(case, repetition=rep))
+                    if stopped:
+                        break
+                if cell_complete and not stopped:
+                    completed_cells += 1
+
+    if stats is not None:
+        stats["completed_cells"] = completed_cells
+        stats["estimated_spend_usd"] = estimated_spend
+        stats["stopped"] = stopped
     return results
 
 
