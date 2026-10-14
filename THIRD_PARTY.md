@@ -42,3 +42,13 @@ fallback is needed.
 |---|---|---|
 | AgentDojo (agentdojo-core) | TBD ([ME], M0) | TBD (re-verify on target machine) |
 | InjecAgent | TBD ([ME], M0) | TBD (re-verify on target machine) |
+
+### M1 Sandbox / tools / user-task catalog reuse
+
+The M1 Sandbox, the four Simulated_Tools (`aib/tools.py`), and the full
+40-task User_Task catalog with its deterministic success checks (`aib/tasks.py`)
+are **original authored material** for this repository. No task text, fixture
+body, or success-check ground truth was copied from AgentDojo, InjecAgent, or
+any other third-party source. If the owner later imports task or fixture
+material from a third-party suite during the `[ME]` refinement of task 2.7,
+record its name, version, license, and attribution here.
