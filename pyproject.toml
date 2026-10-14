@@ -1,0 +1,48 @@
+# Private portfolio repo: not published to PyPI.
+# No OSS `license` field and no PyPI classifier are declared on purpose. This
+# repository stays private (portfolio rule 0.8-adjacent). Mirrors the sibling
+# grounded-qa-service subproject style.
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aib"
+version = "0.0.0"
+description = "Agent Injection Bench: measures prompt-injection success for tool-using agents and the task-success cost of defenses in a simulated sandbox (private portfolio project)."
+requires-python = ">=3.11,<3.12"
+# NOTE: intentionally no `license` field and no OSS classifier. Private repo.
+
+# Exact pins verified on this machine (Python 3.11.5, pip 24.3.1) via
+# `pip index versions` + `pip install --dry-run`. numpy is held at the last
+# 2.4.x release because 2.5.x drops Python 3.11 support. scipy is held at
+# 1.15.0: the nearest real release that resolves against numpy==2.4.6 (the
+# candidate scipy==1.14.1 pins numpy<2.3 and conflicts).
+dependencies = [
+    "openai==3.29.0",
+    "httpx==0.28.1",
+    "numpy==2.4.6",
+    "scipy==1.15.0",
+    "matplotlib==3.9.2",
+]
+
+[project.optional-dependencies]
+# Test/dev tooling. Installed in CI; see .github/workflows/ci.yml.
+test = [
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "hypothesis==6.169.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["aib*"]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.hypothesis]
+# Design Testing Strategy: >=100 iterations for Python property tests.
+max_examples = 100

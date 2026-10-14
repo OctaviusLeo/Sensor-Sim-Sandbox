@@ -1,0 +1,22 @@
+# Secret-bearing files (never commit; keys come from env vars only)
+.env
+*.env
+.env.*
+*.key
+*.pem
+*.token
+secrets.yaml
+
+# Python junk
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+build/
+dist/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/

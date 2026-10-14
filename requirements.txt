@@ -1,0 +1,14 @@
+# Exact pins (runtime + test), verified on Python 3.11.5 / pip 24.3.1.
+# Mirrors the pins in pyproject.toml.
+
+# Runtime
+openai==3.29.0
+httpx==0.28.1
+numpy==2.4.6
+scipy==1.15.0
+matplotlib==3.9.2
+
+# Test
+pytest==9.1.1
+pytest-cov==7.1.0
+hypothesis==6.169.0
