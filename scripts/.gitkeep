@@ -1,0 +1,3 @@
+# Repository scripts: M0 smoke test, headless UE Automation test runner (task 8),
+# run+record, and rate measurement (task 18.1). Each result-producing script records
+# its command, seed, and full commit hash (portfolio rules).

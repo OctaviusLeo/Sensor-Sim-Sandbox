@@ -1,0 +1,6 @@
+# Top-level run description (RunConfig) loaded by analyze.py. Placeholder values.
+seed: 1234                        # int, run seed; every per-sensor RNG derives from it
+output_dir: results               # where Run_Logs, bags, and results/ artifacts are written
+camera_sampling_interval: "1/5"   # frames-logged-per-frames-produced (Requirement 5.3)
+lidar_config: config/lidar.yaml   # -> LidarConfig
+camera_config: config/camera.yaml # -> CameraConfig

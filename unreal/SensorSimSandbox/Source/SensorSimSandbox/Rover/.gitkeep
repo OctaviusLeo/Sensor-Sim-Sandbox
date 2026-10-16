@@ -1,0 +1,2 @@
+# ARover pawn + WaypointController (tasks 4.x). Controller state machine is isolated
+# from rendering for unit testing.

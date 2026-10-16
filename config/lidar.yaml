@@ -1,0 +1,12 @@
+# Lidar_Model configuration (LidarConfig). Bounds enforced; out-of-bound values are
+# rejected, the offending parameter is named, and the last valid config is retained
+# (Requirement 3.1, 3.2). Placeholder values — tune per run.
+channels: 32                 # int, 1-128
+h_fov_deg: 360.0             # float, (0, 360]
+v_fov_deg: 30.0              # float, (0, 180]
+angular_resolution_deg: 0.2  # float, 0.01-10.0
+max_range_m: 100.0           # float, 0.1-1000.0
+rate_hz: 10.0                # float, 0.1-100.0
+range_noise_sigma_m: 0.02    # float, 0.0-10.0
+dropout_prob: 0.01           # float, 0.0-1.0
+latency_ms: 20               # int, 0-1000

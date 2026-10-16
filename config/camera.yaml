@@ -1,0 +1,9 @@
+# Camera_Model configuration (CameraConfig). Bounds enforced; out-of-bound values are
+# rejected, the offending parameter is named, and the last valid config is retained
+# (Requirement 4.1, 4.2). Placeholder values — tune per run.
+width: 640             # int, 1-7680
+height: 480            # int, 1-7680
+rate_hz: 10.0          # float, 0.1-100.0
+pixel_noise_sigma: 2.0 # float, 0.0-255.0
+frame_dropout_prob: 0.01  # float, 0.0-1.0
+latency_ms: 30         # int, 0-1000

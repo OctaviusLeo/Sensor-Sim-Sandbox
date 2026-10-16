@@ -1,0 +1,85 @@
+# ─────────────────────────────────────────────────────────────
+# Secrets — NEVER commit. All secrets are read from environment
+# variables (Requirement 0.8). Every secret-bearing file is listed
+# here so none is tracked in version control.
+# ─────────────────────────────────────────────────────────────
+.env
+.env.*
+*.env
+env.local
+*.local.env
+secrets.yaml
+secrets.yml
+secrets.json
+*.secret
+*.secrets
+local.settings.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+*.token
+.rostoken
+credentials.json
+credentials.yaml
+.netrc
+.aws/
+.ros/credentials/
+
+# ─────────────────────────────────────────────────────────────
+# Unreal Engine
+# ─────────────────────────────────────────────────────────────
+unreal/SensorSimSandbox/Binaries/
+unreal/SensorSimSandbox/Build/
+unreal/SensorSimSandbox/DerivedDataCache/
+unreal/SensorSimSandbox/Intermediate/
+unreal/SensorSimSandbox/Saved/
+unreal/SensorSimSandbox/.vs/
+unreal/SensorSimSandbox/*.sln
+unreal/SensorSimSandbox/*.VC.db
+unreal/SensorSimSandbox/*.opensdf
+unreal/SensorSimSandbox/*.sdf
+unreal/SensorSimSandbox/*.suo
+
+# ─────────────────────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+build/
+dist/
+
+# ─────────────────────────────────────────────────────────────
+# Generated results (plots / summary are produced by analyze.py;
+# tracked selectively, scratch output ignored)
+# ─────────────────────────────────────────────────────────────
+results/*.png
+results/*.jpg
+results/*.svg
+results/scratch/
+*.bag
+*.db3
+*.mcap
+
+# ─────────────────────────────────────────────────────────────
+# OS / editor
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
