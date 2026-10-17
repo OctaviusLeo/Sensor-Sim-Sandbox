@@ -1,0 +1,17 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.8",
+	"Category": "",
+	"Description": "Sensor Sim Sandbox — drivable rover with simulated lidar and camera streaming to ROS 2 over a rosbridge WebSocket.",
+	"Modules": [
+		{
+			"Name": "SensorSimSandbox",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"CoreUObject"
+			]
+		}
+	]
+}
