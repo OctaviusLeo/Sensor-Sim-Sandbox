@@ -59,11 +59,11 @@ Kiro runs every task on the owner's Windows 11 desktop with the RTX 3080. That d
 
 | Item | Value |
 | --- | --- |
-| Repository root | `C:\dev\Sensor-Sim-Sandbox` (WSL path `/mnt/c/dev/Sensor-Sim-Sandbox`) |
-| Unreal Engine | 5.8.x from the Epic Games Launcher at `C:\Program Files\Epic Games\UE_5.8` |
+| Repository root | `C:\dev\Projects` (WSL path `/mnt/c/dev/Projects`) |
+| Unreal Engine | 5.8.3 at `C:\Program Files (x86)\UE_5.8` |
 | Unreal project | `unreal/SensorSimSandbox/SensorSimSandbox.uproject`, module `SensorSimSandbox`, editor target `SensorSimSandboxEditor`, level `/Game/Maps/RoverLevel` |
 | Visual Studio | 2026 with the workloads Epic lists for UE 5.8 |
-| ROS 2 | Jazzy in WSL distro `Ubuntu-24.04`, sourced with `source /opt/ros/jazzy/setup.bash` |
+| ROS 2 | Jazzy in WSL distro `Ubuntu` (Ubuntu 24.04.5), sourced with `source /opt/ros/jazzy/setup.bash` |
 | rosbridge | `ros2 launch rosbridge_server rosbridge_websocket_launch.xml`, reached from Windows at `ws://localhost:9090` |
 | Python | Windows `py -3.12`, virtual environment `.venv` at the repository root, pinned packages in `analysis/requirements.txt` |
 | Other tools | Git, GitHub CLI (`gh`, already signed in), FFmpeg (`ffmpeg` on PATH) |
@@ -72,7 +72,7 @@ Kiro runs every task on the owner's Windows 11 desktop with the RTX 3080. That d
 - **Unreal tools only through scripts.** Every Unreal build, test, or launch is a PowerShell script in `scripts/`, run as `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\<name>.ps1`.
 - **One Unreal process at a time.** Before building or launching, a script waits until no `UnrealBuildTool` or `UnrealEditor*` process is running, and it passes `-WaitMutex` to `Build.bat`. Tasks that run in the same wave must not build the same project concurrently.
 - **Long steps run in the background.** Kiro stops a single command after at most 30 minutes. A cold build, the first editor launch (shader compile), and the end-to-end run start as background processes that write to `runs/logs/<name>.log` and an exit-code file; the agent polls those files with short commands.
-- **ROS commands run inside WSL from Windows:** `wsl -d Ubuntu-24.04 -- bash -c "source /opt/ros/jazzy/setup.bash && <command>"`. No ROS 2 node runs on the Windows side, so no DDS traffic crosses Windows and WSL.
+- **ROS commands run inside WSL from Windows:** `wsl -d Ubuntu -- bash -c "source /opt/ros/jazzy/setup.bash && <command>"`. No ROS 2 node runs on the Windows side, so no DDS traffic crosses Windows and WSL.
 - **No `sudo`.** System packages are installed by the owner before the run. A missing system package is a blocker, not something to work around.
 - **Bags** are recorded inside WSL with `ros2 bag record -s sqlite3 -o /mnt/c/dev/Sensor-Sim-Sandbox/runs/<run_id>/bag <topics>` and read on Windows with the pure-Python `rosbags` package (Apache-2.0), so the analysis never imports ROS. A minimal test proves the installed `rosbags` version reads a Jazzy sqlite3 bag before the loader relies on it.
 - **Raw outputs vs results.** Run_Logs, bags, frames, and logs go under `runs/` (gitignored). Generated tables and plots go under `results/` and are committed.
