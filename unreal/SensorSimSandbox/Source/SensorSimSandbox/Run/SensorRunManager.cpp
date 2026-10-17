@@ -25,6 +25,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/DateTime.h"
 #include "CoreGlobals.h"
+#include "UnrealClient.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSensorRun, Log, All);
 
@@ -76,6 +77,7 @@ void ASensorRunManager::BeginPlay()
 	FParse::Value(Cmd, TEXT("Seed="), Seed);
 	FParse::Value(Cmd, TEXT("MinCameraFrames="), MinCameraFrames);
 	FParse::Value(Cmd, TEXT("MinDurationS="), MinDurationS);
+	FParse::Value(Cmd, TEXT("DemoFramesDir="), DemoFramesDir);
 
 	FLidarConfig LidarCfg;
 	FCameraConfig CameraCfg;
@@ -298,6 +300,21 @@ void ASensorRunManager::UpdateViewCamera()
 	ViewCamera->SetActorLocationAndRotation(Eye, (Look - Eye).Rotation());
 }
 
+void ASensorRunManager::CaptureDemoFrame(double T)
+{
+	// Viewport screenshots contain only the game's own render, never other
+	// windows on the desktop. 100 frames at 10 fps from t = 10 s.
+	constexpr int32 DemoFrames = 100;
+	if (DemoFramesDir.IsEmpty() || DemoFrameIndex >= DemoFrames || T < NextDemoTime)
+	{
+		return;
+	}
+	const FString Path = FPaths::Combine(DemoFramesDir, FString::Printf(TEXT("demo_%04d.png"), DemoFrameIndex));
+	FScreenshotRequest::RequestScreenshot(Path, /*bShowUI*/ false, /*bAddFilenameSuffix*/ false);
+	++DemoFrameIndex;
+	NextDemoTime += 0.1;
+}
+
 void ASensorRunManager::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -312,6 +329,7 @@ void ASensorRunManager::Tick(float DeltaSeconds)
 	const double T = Now();
 	CaptureDue(T);
 	ReleaseDue(T);
+	CaptureDemoFrame(T);
 
 	if (Rover && Tf)
 	{

@@ -15,8 +15,9 @@
          (ASensorRunManager: sensors, bridge, Run_Log), t.MaxFPS 120, vsync off.
       6. Once the Run_Log has records, run `ros2 topic hz` on /lidar/points and
          /camera/image/compressed for 60 s each, in parallel; raw output saved.
-      7. Capture a ~10 s demo GIF of the game window with FFmpeg gdigrab,
-         640 px wide, to docs/media/demo.gif (must be < 10 MB).
+      7. The game saves 10 s of 10 fps viewport screenshots (game render only,
+         never other desktop windows); FFmpeg turns them into a 640 px wide GIF at
+         docs/media/demo.gif (must be < 10 MB).
       8. The game stops itself at >= MinCameraFrames frames AND >= MinDurationS s
          and quits cleanly (Run_Log flushed, run_done.txt with the average frame
          time); the bag is stopped with SIGINT.
@@ -53,6 +54,7 @@ $RunDir    = Join-Path $RepoRoot "runs\$RunId"
 $HzDir     = Join-Path $RunDir 'hz'
 $BagDir    = Join-Path $RunDir 'bag'
 $LogDir    = Join-Path $RunDir 'logs'
+$DemoDir   = Join-Path $RunDir 'demo_frames'
 $GifPath   = Join-Path $RepoRoot 'docs\media\demo.gif'
 New-Item -ItemType Directory -Force -Path $RunDir, $HzDir, $LogDir, (Split-Path $GifPath) | Out-Null
 
@@ -146,7 +148,7 @@ $runLog = Join-Path $RunDir 'run_log.jsonl'
 $gameArgs = @(
     "`"$UProject`"", '/Game/Maps/RoverLevel', '-game', '-windowed', '-ResX=1280', '-ResY=720',
     '-E2ERun', '-RoverMode=Waypoint', "-RunDir=`"$RunDir`"", "-Seed=$Seed",
-    "-MinCameraFrames=$MinCameraFrames", "-MinDurationS=$MinDurationS",
+    "-MinCameraFrames=$MinCameraFrames", "-MinDurationS=$MinDurationS", "-DemoFramesDir=`"$DemoDir`"",
     '-BridgeHost=127.0.0.1', "-BridgePort=$Port",
     '-ExecCmds="t.MaxFPS 120,r.VSync 0"',
     '-unattended', '-nopause', '-nosplash', '-log', "-abslog=`"$editorLog`""
@@ -162,7 +164,7 @@ for ($i = 0; $i -lt 300 -and -not $flowing -and -not $game.HasExited; $i++) {
     $flowing = (Test-Path $runLog) -and ((Get-Item $runLog).Length -gt 100000)
 }
 if (-not $flowing) { Fail "no Run_Log records after launch (game exited=$($game.HasExited); see $editorLog)" }
-Write-Step 'Run_Log records flowing; starting ros2 topic hz windows and GIF capture'
+Write-Step 'Run_Log records flowing; starting ros2 topic hz windows'
 Start-Sleep -Seconds 5
 
 # --- 6. ros2 topic hz, 60 s each, in parallel --------------------------------
@@ -172,20 +174,6 @@ foreach ($t in @('/lidar/points', '/camera/image/compressed')) {
     $name = 'hz_' + ($t.Trim('/') -replace '/', '_')
     $hzProcs += Start-WslDetached $name "timeout -s INT $HzWindowSec stdbuf -oL ros2 topic hz $t > '$f' 2>&1; echo done >> '$f'"
 }
-
-# --- 7. Demo GIF ------------------------------------------------------------
-$gifOk = $false
-try {
-    $title = (Get-Process -Id $game.Id).MainWindowTitle
-    $raw = Join-Path $LogDir 'demo_raw.mp4'
-    $palette = Join-Path $LogDir 'palette.png'
-    Write-Step "capturing 10 s of window '$title'"
-    & ffmpeg -hide_banner -loglevel error -y -f gdigrab -framerate 15 -t 10 -i "title=$title" -c:v libx264 -preset veryfast -crf 18 $raw
-    & ffmpeg -hide_banner -loglevel error -y -i $raw -vf 'fps=10,scale=640:-1:flags=lanczos,palettegen' $palette
-    & ffmpeg -hide_banner -loglevel error -y -i $raw -i $palette -lavfi 'fps=10,scale=640:-1:flags=lanczos[x];[x][1:v]paletteuse' $GifPath
-    $gifOk = (Test-Path $GifPath) -and ((Get-Item $GifPath).Length -lt 10MB) -and ((Get-Item $GifPath).Length -gt 0)
-    Write-Step ("demo GIF: ok={0} size={1:N0} bytes" -f $gifOk, $(if (Test-Path $GifPath) { (Get-Item $GifPath).Length } else { 0 }))
-} catch { Write-Step "GIF capture failed: $($_.Exception.Message)" }
 
 foreach ($h in $hzProcs) { $null = $h.WaitForExit(($HzWindowSec + 30) * 1000) }
 Write-Step 'ros2 topic hz windows finished'
@@ -202,6 +190,18 @@ $null = $bagProc.WaitForExit(30000)
 $doneFile = Join-Path $RunDir 'run_done.txt'
 $done = if (Test-Path $doneFile) { Get-Content $doneFile -Raw } else { '' }
 Write-Step "run_done.txt:`n$done"
+
+# --- 7. Demo GIF from the game's own viewport screenshots --------------------
+$gifOk = $false
+$frames = @(Get-ChildItem -Path $DemoDir -Filter 'demo_*.png' -ErrorAction SilentlyContinue)
+if ($frames.Count -ge 50) {
+    $palette = Join-Path $LogDir 'palette.png'
+    $pattern = Join-Path $DemoDir 'demo_%04d.png'
+    & ffmpeg -hide_banner -loglevel error -y -framerate 10 -i $pattern -vf 'scale=640:-1:flags=lanczos,palettegen' $palette
+    & ffmpeg -hide_banner -loglevel error -y -framerate 10 -i $pattern -i $palette -lavfi 'scale=640:-1:flags=lanczos[x];[x][1:v]paletteuse' $GifPath
+    $gifOk = (Test-Path $GifPath) -and ((Get-Item $GifPath).Length -gt 0) -and ((Get-Item $GifPath).Length -lt 10MB)
+}
+Write-Step ("demo GIF: ok={0} frames={1} size={2:N0} bytes" -f $gifOk, $frames.Count, $(if (Test-Path $GifPath) { (Get-Item $GifPath).Length } else { 0 }))
 if ($done -notmatch 'status=PASS') { Fail "run did not complete (see $doneFile and $editorLog)" }
 
 # --- 9. Analysis -------------------------------------------------------------

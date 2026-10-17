@@ -37,6 +37,7 @@ class FRosbridgeClient;
  *
  * Command line: -E2ERun -RunDir=<abs folder> [-Seed=1234] [-MinCameraFrames=2000]
  *   [-MinDurationS=120] [-CameraSamplingInterval=1/10] [-BridgeHost/-BridgePort]
+ *   [-DemoFramesDir=<abs folder>]  (10 s of 10 fps viewport screenshots for the demo GIF)
  */
 UCLASS()
 class SENSORSIMSANDBOX_API ASensorRunManager : public AActor
@@ -72,6 +73,7 @@ private:
 	void PublishScan(const FPendingScan& P, double TPublish);
 	void PublishFrame(const FPendingFrame& P, double TPublish);
 	void UpdateViewCamera();
+	void CaptureDemoFrame(double T);
 	void FinishRun(const FString& Reason);
 
 	UPROPERTY() TObjectPtr<ARover> Rover;
@@ -87,6 +89,9 @@ private:
 	TLatencyQueue<FPendingFrame> CameraQueue;
 
 	FString RunDir;
+	FString DemoFramesDir;
+	double NextDemoTime = 10.0; // start 10 s in, once the rover is moving
+	int32 DemoFrameIndex = 0;
 	int64 Seed = 1234;
 	int32 MinCameraFrames = 2000;
 	double MinDurationS = 120.0;
