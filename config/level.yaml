@@ -1,0 +1,74 @@
+# RoverLevel content and waypoint route (LevelConfig + waypoint route), read by the
+# programmatic level builder in the SensorSimSandbox module and by ARover's waypoint
+# controller. The level is built from engine basic shapes only (/Engine/BasicShapes/)
+# with no marketplace content (Requirement 2.2, design "Level content"). All positions
+# are Unreal world coordinates in centimeters (left-handed, X forward, Y right, Z up);
+# the REP 103 conversion to meters happens downstream (task 9), not here.
+
+# Ground plane: a scaled Cube from engine basic shapes acting as the floor.
+ground:
+  size_m: 50.0          # half-extent of the square ground in meters
+  z_cm: 0.0             # top surface height (world Z, cm)
+
+# Lighting so camera frames are not black (design "Level content").
+lighting:
+  directional:
+    pitch_deg: -45.0    # sun elevation (negative pitch aims downward)
+    yaw_deg: 30.0
+    intensity_lux: 8.0
+  sky:
+    intensity: 1.0
+
+# At least three static obstacles, engine basic shapes only. Each has a shape,
+# a world position (cm), a uniform scale, and an RGB color (0-1) applied via a
+# dynamic material instance over an engine material.
+obstacles:
+  - name: Obstacle_CubeA
+    shape: Cube
+    pos_cm: [1500.0, 0.0, 100.0]
+    scale: [2.0, 2.0, 2.0]
+    color: [0.55, 0.55, 0.55]
+  - name: Obstacle_SphereB
+    shape: Sphere
+    pos_cm: [500.0, 1800.0, 150.0]
+    scale: [3.0, 3.0, 3.0]
+    color: [0.5, 0.5, 0.5]
+  - name: Obstacle_CylC
+    shape: Cylinder
+    pos_cm: [-1200.0, 900.0, 150.0]
+    scale: [2.0, 2.0, 3.0]
+    color: [0.6, 0.6, 0.6]
+
+# At least three distinguishable landmarks: each differs from every other in at
+# least one of shape, color, or geometry (Requirement 2.2) so a viewer can tell
+# them apart. Here all three differ in BOTH shape and color.
+landmarks:
+  - name: Landmark_RedCone
+    shape: Cone
+    pos_cm: [2500.0, 2500.0, 100.0]
+    scale: [1.5, 1.5, 2.0]
+    color: [0.90, 0.10, 0.10]   # red
+  - name: Landmark_GreenCylinder
+    shape: Cylinder
+    pos_cm: [-2500.0, 2500.0, 150.0]
+    scale: [1.0, 1.0, 3.0]
+    color: [0.10, 0.80, 0.20]   # green
+  - name: Landmark_BlueSphere
+    shape: Sphere
+    pos_cm: [0.0, -2500.0, 150.0]
+    scale: [2.0, 2.0, 2.0]
+    color: [0.15, 0.35, 0.95]   # blue
+
+# Scripted waypoint route driven in Waypoint mode (Requirement 2.3-2.6). Positions
+# are Unreal world XY in centimeters; the rover drives to each in order, advancing
+# when within arrival_tolerance_m, holding at the final one, and stopping + reporting
+# if it does not reach the current waypoint within waypoint_timeout_s.
+waypoints:
+  arrival_tolerance_m: 1.5     # meters
+  waypoint_timeout_s: 30.0     # seconds allowed per waypoint before timeout
+  route_cm:
+    - [1000.0, 0.0]
+    - [1000.0, 1500.0]
+    - [-1000.0, 1500.0]
+    - [-1000.0, -1000.0]
+    - [0.0, 0.0]
