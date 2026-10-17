@@ -3,6 +3,7 @@
 #include "Rover/RoverLevelBuilder.h"
 
 #include "Rover/Rover.h"
+#include "Run/SensorRunManager.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
 #include "Components/StaticMeshComponent.h"
@@ -104,7 +105,22 @@ void ARoverLevelBuilder::BuildLevel(const FRoverLevelConfig& Config)
 		SpawnShapeActor(Landmark);
 	}
 
-	SpawnRover();
+	ARover* Rover = SpawnRover();
+
+	// -E2ERun: drive the full sensor run (sensors, bridge, Run_Log) on the rover.
+	if (Rover && FParse::Param(FCommandLine::Get(), TEXT("E2ERun")))
+	{
+		FActorSpawnParameters RunParams;
+		RunParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		RunParams.bDeferConstruction = true;
+		ASensorRunManager* RunManager = GetWorld()->SpawnActor<ASensorRunManager>(
+			ASensorRunManager::StaticClass(), FTransform::Identity, RunParams);
+		if (RunManager)
+		{
+			RunManager->SetRover(Rover);
+			RunManager->FinishSpawning(FTransform::Identity);
+		}
+	}
 }
 
 void ARoverLevelBuilder::SpawnGround(const FRoverGround& Ground)

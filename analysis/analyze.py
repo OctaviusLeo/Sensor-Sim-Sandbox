@@ -106,6 +106,22 @@ def run(argv: list[str] | None = None) -> int:
             else:
                 notes.append(f"No bag at `{bag_path}`; bag rate cross-check skipped.")
 
+        done = log.folder / "run_done.txt"
+        if done.is_file():
+            kv = dict(
+                line.split("=", 1) for line in done.read_text(encoding="utf-8").splitlines() if "=" in line
+            )
+            notes.append(
+                "End-to-end run (`run_done.txt`): status {status}, elapsed {elapsed_s} s, "
+                "camera frames produced {camera_frames_produced} (dropped {camera_frames_dropped}), "
+                "lidar scans {lidar_scans_produced}, /tf messages {tf_published}, "
+                "average frame time {avg_frame_time_ms} ms over {ticks} ticks.".format_map(
+                    {k: kv.get(k, "n/a") for k in (
+                        "status", "elapsed_s", "camera_frames_produced", "camera_frames_dropped",
+                        "lidar_scans_produced", "tf_published", "avg_frame_time_ms", "ticks")}
+                )
+            )
+
         text = render_summary(
             metrics,
             command=command,

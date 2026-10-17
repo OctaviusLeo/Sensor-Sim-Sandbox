@@ -61,6 +61,11 @@ void ALidarModel::CaptureTruthRanges(const TArray<FLidarRayDir>& Rays, TArray<FS
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(LidarScan), /*bTraceComplex*/ false);
 	Params.AddIgnoredActor(this);
+	if (AActor* Mount = GetAttachParentActor())
+	{
+		// Do not let the platform the sensor is mounted on (the rover) occlude it.
+		Params.AddIgnoredActor(Mount);
+	}
 
 	for (int32 i = 0; i < Rays.Num(); ++i)
 	{
