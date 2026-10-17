@@ -90,6 +90,22 @@ public:
 	/** The unreached waypoint index reported on timeout, or INDEX_NONE. */
 	int32 GetUnreachedWaypointIndex() const { return WaypointMachine.GetUnreachedWaypointIndex(); }
 
+	/**
+	 * Test-only seam: inject the keyboard throttle/steer axis values that the
+	 * input handlers would otherwise set from real key presses. This exists so
+	 * the headless automation test for "keyboard ignored in waypoint mode"
+	 * (2.3) can drive the exact same code path a key press would, without a
+	 * player controller or input device, and then assert that in Waypoint mode
+	 * the injected axis has NO effect on the commanded motion. It writes the
+	 * same private fields OnThrottleInput/OnSteerInput write (clamped to
+	 * [-1, 1]); it does not change any runtime behavior or decision logic.
+	 */
+	void Test_InjectKeyboardAxis(float InThrottleAxis, float InSteerAxis)
+	{
+		ThrottleAxis = FMath::Clamp(InThrottleAxis, -1.0f, 1.0f);
+		SteerAxis = FMath::Clamp(InSteerAxis, -1.0f, 1.0f);
+	}
+
 protected:
 	/** Visible body built from an engine basic shape (no marketplace content). */
 	UPROPERTY(VisibleAnywhere, Category = "Rover")
