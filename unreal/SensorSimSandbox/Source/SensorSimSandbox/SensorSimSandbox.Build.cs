@@ -8,6 +8,14 @@ public class SensorSimSandbox : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		// This module uses a flat layout (sources in subfolders directly under
+		// the module root, no Public/Private split). Under the UE 5.8 build
+		// settings (bLegacyPublicIncludePaths = false) the module root is no
+		// longer an implicit include path, so includes like
+		// "Bridge/SmokePublisher.h" would not resolve. Add the module root
+		// explicitly so subfolder-relative includes work.
+		PublicIncludePaths.Add(ModuleDirectory);
+
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core",

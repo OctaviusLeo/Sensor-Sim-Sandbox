@@ -10,6 +10,7 @@
 #include "HAL/IConsoleManager.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Containers/Ticker.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSmokePublisher, Log, All);
 
@@ -101,8 +102,20 @@ void FSmokePublisher::Run(const FString& Url, const FString& Payload, TFunction<
 		UE_LOG(LogSmokePublisher, Log, TEXT("Sent advertise: %s"), *Advertise);
 		UE_LOG(LogSmokePublisher, Log, TEXT("Sent publish: %s"), *Publish);
 
-		Self->Finish(true, FString::Printf(TEXT("advertised and published to %s on %s"),
-			*FSmokePublisher::GetTopic(), *Url));
+		// Keep the WebSocket OPEN briefly after sending. rosbridge turns the
+		// advertise into a ROS publisher and then delivers the publish on the
+		// ROS graph asynchronously; if we close the socket immediately rosbridge
+		// can tear the connection (and its publisher) down before a `ros2 topic
+		// echo` subscriber receives the message, which looks like a lost round
+		// trip. Hold the connection open for a short grace period, then finish.
+		const float GraceSeconds = 2.5f;
+		FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
+			[Self, Url](float /*Dt*/) -> bool
+			{
+				Self->Finish(true, FString::Printf(TEXT("advertised and published to %s on %s"),
+					*FSmokePublisher::GetTopic(), *Url));
+				return false; // one-shot
+			}), GraceSeconds);
 	});
 
 	Socket->OnConnectionError().AddLambda([Self](const FString& Error)

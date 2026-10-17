@@ -1,0 +1,34 @@
+﻿{
+    "chosen_option":  "a",
+    "all_failed":  false,
+    "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\smoke_test.ps1 -EnginePath \"C:\\Program Files (x86)\\UE_5.8\" -WsUrl \"ws://127.0.0.1:9090\" -WslDistro \"Ubuntu\"",
+    "commit":  "101d32bf25db9bf86fd06b5a4aa35c20855d982c",
+    "ws_url":  "ws://127.0.0.1:9090",
+    "wsl_distro":  "Ubuntu",
+    "engine_path":  "C:\\Program Files (x86)\\UE_5.8",
+    "timestamp_utc":  "2026-10-17T01:51:18.6391927Z",
+    "options":  {
+                    "option":  "a",
+                    "attempted":  true,
+                    "passed":  true,
+                    "conditions":  {
+                                       "no_windows_wsl_dds":  true,
+                                       "rosbridge_listening":  true,
+                                       "cpp_compiles_zero_errors":  true,
+                                       "editor_opens_no_error":  true,
+                                       "ros2_echo_within_timeout":  true
+                                   },
+                    "evidence":  {
+                                     "compile_log":  "C:\\dev\\Projects\\docs\\evidence\\compile.log",
+                                     "editor_screenshot":  "C:\\dev\\Projects\\docs\\evidence\\editor_open.png",
+                                     "editor_startup_log":  "C:\\dev\\Projects\\docs\\evidence\\editor_startup.log",
+                                     "ros2_echo":  "C:\\dev\\Projects\\docs\\evidence\\ros2_echo_smoke.txt"
+                                 },
+                    "first_failure":  null
+                },
+    "environment":  {
+                        "nvidia_smi_captured":  true,
+                        "winver_captured":  true,
+                        "environment_doc":  "C:\\dev\\Projects\\docs\\ENVIRONMENT.md"
+                    }
+}
