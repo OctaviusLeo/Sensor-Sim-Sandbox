@@ -1,0 +1,16 @@
+# Task 12.3 — live `ros2 topic hz /tf` evidence (Requirement 7.4)
+# Generated: 2026-10-17T11:01:39.4272186-04:00
+# Command: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\run_integration_tf_hz.ps1
+# Commit:  0d0bf5d5a835645ea70d168e83b52636fc7fa922
+# Engine:  C:\Program Files (x86)\UE_5.8
+# Window:  20 s publish, 26 s hz sample
+
+## /tf published through the live Rosbridge_Client (editor log):
+[2026.10.17-15.01.37:831][616]LogTfPublish: TfPublish done: 200 /tf publishes over a 19.904 s publish span => 9.9978 Hz ((n-1)/T), socket connected=0. Disconnecting and requesting engine exit.
+
+## Live `ros2 topic hz /tf`: DEFERRED
+Reason: rosbridge not reachable: rosbridge did not answer HTTP 101 on localhost:9090 at '//' within timeout.
+To run later on this host (rosbridge up in WSL, one Unreal process at a time):
+  pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\run_integration_tf_hz.ps1
+The headless FTfPublisher scheduler >= 10 Hz measurement (automation test
+SensorSimSandbox.Integration.KeyboardLatencyAndTfRate) stands as the 7.4 pass.
