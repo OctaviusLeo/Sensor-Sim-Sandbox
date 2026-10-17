@@ -1,0 +1,14 @@
+# Top-level run description (RunConfig) loaded by analyze.py and scripts/run_e2e.ps1.
+# Gate A values (design.md "Gate A run configuration").
+seed: 1234                         # int, run seed; every per-sensor RNG derives from it
+output_dir: results                # where analyze.py writes plots and summary.md
+camera_sampling_interval: "1/10"   # frames-logged-per-frames-produced (Requirement 5.3)
+lidar_config: config/lidar.yaml    # -> LidarConfig
+camera_config: config/camera.yaml  # -> CameraConfig
+min_camera_frames: 2000            # e2e stops only after this many camera frames were produced
+min_duration_s: 120                # ... and only after this many seconds
+max_fps: 120                       # t.MaxFPS for the e2e run
+# Inputs read by analyze.py; scripts/run_e2e.ps1 writes the latest run here.
+run_log: runs/latest/run_log.jsonl
+bag: runs/latest/bag               # optional; rate cross-check from bag timestamps
+topic_hz_dir: runs/latest/hz       # optional; raw `ros2 topic hz` captures (<topic>.txt)

@@ -95,8 +95,8 @@ equivalent command-line capture.)
 > Epic default `C:\Program Files\Epic Games\UE_5.8`), and task 2.2's smoke test built
 > and launched the project on it. ROS runs in the WSL distro named `Ubuntu` (also
 > Ubuntu 24.04.5 LTS with ROS 2 Jazzy), which is the distro that hosts the rosbridge
-> on `localhost:9090`. The Python-analysis rows (pytest/Hypothesis/NumPy/matplotlib/
-> PyYAML/rosbags) remain _TBD_ until the `.venv` is created in M4 (task 16); do not
+> on `localhost:9090`. The Python-analysis rows come from the `.venv` created in M4
+> (task 16, `py -3.12 -m venv .venv`; pins in `analysis/requirements.txt`); do not
 > record a version without its verifiable artifact.
 
 | Component | Exact version | Verifiable artifact (query / docs ref / passing test) |
@@ -117,12 +117,14 @@ equivalent command-line capture.)
 | Python (WSL / ROS) | 3.12.3 | `wsl -d Ubuntu -- python3 --version` → `Python 3.12.3` |
 | GitHub CLI | 2.102.0 (2026-09-30) | `gh --version` → `gh version 2.102.0 (2026-09-30)` |
 | FFmpeg | N-118205-gd3aa99a4f4-20250101 | `ffmpeg -version` → `ffmpeg version N-118205-gd3aa99a4f4-20250101` |
-| pytest | _TBD — set up with the `.venv` in M4 (task 16)_ | _TBD_ |
-| Hypothesis | _TBD — set up with the `.venv` in M4 (task 16)_ | _TBD_ |
-| NumPy | _TBD — set up with the `.venv` in M4 (task 16)_ | _TBD_ |
-| matplotlib | _TBD — set up with the `.venv` in M4 (task 16)_ | _TBD_ |
-| PyYAML | _TBD — set up with the `.venv` in M4 (task 16)_ | _TBD_ |
-| rosbags / ros2 bag reader | _TBD — set up with the `.venv` in M4 (task 16)_ | _TBD_ |
+| pytest | 9.1.1 | `.\.venv\Scripts\python -m pip freeze` → `pytest==9.1.1` |
+| Hypothesis | 6.170.1 | `.\.venv\Scripts\python -m pip freeze` → `hypothesis==6.170.1` |
+| NumPy | 2.5.4 | `.\.venv\Scripts\python -m pip freeze` → `numpy==2.5.4` |
+| matplotlib | 3.11.2 | `.\.venv\Scripts\python -m pip freeze` → `matplotlib==3.11.2` |
+| PyYAML | 6.0.3 | `.\.venv\Scripts\python -m pip freeze` → `PyYAML==6.0.3` |
+| rosbags / ros2 bag reader | 0.11.8 | `.\.venv\Scripts\python -m pip freeze` → `rosbags==0.11.8` |
+| Pillow | 13.0.0 | `.\.venv\Scripts\python -m pip freeze` → `pillow==13.0.0` |
+| Python (Windows .venv) | 3.12.10 | `py -3.12 --version` → `Python 3.12.10` |
 
 ---
 
