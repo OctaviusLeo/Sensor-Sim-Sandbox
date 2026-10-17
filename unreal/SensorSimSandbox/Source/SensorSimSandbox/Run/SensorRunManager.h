@@ -9,6 +9,7 @@
 #include "Sensors/CameraPipelineRunner.h"
 #include "GroundTruth/GroundTruthLogger.h"
 #include "Coords/TfPublisher.h"
+#include "Sensors/ImuGpsModels.h"
 #include "SensorRunManager.generated.h"
 
 class ARover;
@@ -74,6 +75,11 @@ private:
 	void PublishFrame(const FPendingFrame& P, double TPublish);
 	void UpdateViewCamera();
 	void CaptureDemoFrame(double T);
+	void UpdateMotionTruth(float DeltaSeconds);
+	void CaptureImuGps(double T);
+	void ReleaseImuGps(double T);
+	void LogVectorChannel(const TCHAR* Sensor, const FVectorSample& S, int32 First, int32 Count,
+		const FLogRoverPose& Pose, TOptional<double> TPublish);
 	void FinishRun(const FString& Reason);
 
 	UPROPERTY() TObjectPtr<ARover> Rover;
@@ -87,6 +93,24 @@ private:
 
 	TLatencyQueue<FPendingScan> LidarQueue;
 	TLatencyQueue<FPendingFrame> CameraQueue;
+
+	// M5: IMU and GPS (truth from the rover's motion, computed every tick).
+	FImuPipelineRunner Imu;
+	FGpsPipelineRunner Gps;
+	TMap<int64, FLogRoverPose> ImuGpsPoses; // pose at capture, keyed by (sensor << 40 | seq)
+	bool bImuGpsEnabled = false;
+	double NextImuTime = 0.0;
+	double NextGpsTime = 0.0;
+	int64 ImuSeq = 0;
+	int64 GpsSeq = 0;
+	int64 ImuPublished = 0;
+	int64 GpsPublished = 0;
+	bool bHasPrevMotion = false;
+	FVector PrevPosCm = FVector::ZeroVector;
+	FVector PrevVelCmS = FVector::ZeroVector;
+	FQuat PrevQuat = FQuat::Identity;
+	FVector TruthAccelRos = FVector(0.0, 0.0, 9.80665); // specific force, body frame, m/s^2
+	FVector TruthGyroRos = FVector::ZeroVector;          // body frame, rad/s
 
 	FString RunDir;
 	FString DemoFramesDir;

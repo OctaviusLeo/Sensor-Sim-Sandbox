@@ -1,0 +1,8 @@
+# IMU_Model configuration (M5, Requirement 11.1). Bias is applied to each axis.
+rate_hz: 50              # 0.1-1000
+accel_noise_sigma: 0.05  # m/s^2, 0-100
+accel_bias: 0.02         # m/s^2, -100..100
+gyro_noise_sigma: 0.005  # rad/s, 0-10
+gyro_bias: 0.001         # rad/s, -10..10
+dropout_prob: 0.02       # whole-sample, 0-1
+latency_ms: 20           # 0-1000

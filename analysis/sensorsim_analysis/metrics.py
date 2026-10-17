@@ -74,6 +74,7 @@ class SensorMetrics:
     published_count: int
     configured_rate_hz: float | None
     configured_noise_sigma: float | None
+    configured_bias: float | None = None
     hist_edges: np.ndarray | None = field(default=None, repr=False)
     hist_counts: np.ndarray | None = field(default=None, repr=False)
 
@@ -169,6 +170,7 @@ def compute_metrics(log: RunLog, sensor_config: dict | None = None) -> dict[str,
             published_count=len(publish_times),
             configured_rate_hz=cfg.get("rate_hz"),
             configured_noise_sigma=sigma_cfg,
+            configured_bias=cfg.get("bias"),
             hist_edges=acc.hist_edges,
             hist_counts=acc.hist_counts,
         )

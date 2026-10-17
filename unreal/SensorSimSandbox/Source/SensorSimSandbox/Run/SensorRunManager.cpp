@@ -125,6 +125,29 @@ void ASensorRunManager::BeginPlay()
 		FinishRun(TEXT("config rejected"));
 		return;
 	}
+	// M5 sensors: enabled unless -NoImuGps.
+	bImuGpsEnabled = !FParse::Param(Cmd, TEXT("NoImuGps"));
+	if (bImuGpsEnabled)
+	{
+		FImuConfig ImuCfg;
+		FGpsConfig GpsCfg;
+		if (!FImuConfig::LoadFromFile(FImuConfig::ResolveConfigPath(), ImuCfg, Error)
+			|| !FGpsConfig::LoadFromFile(FGpsConfig::ResolveConfigPath(), GpsCfg, Error)
+			|| !Imu.Initialise(Seed, ImuCfg, TEXT("imu")).bValid
+			|| !Gps.Initialise(Seed, GpsCfg, TEXT("gps")).bValid)
+		{
+			UE_LOG(LogSensorRun, Error, TEXT("E2E run: IMU/GPS config failed: %s"), *Error);
+			FinishRun(TEXT("imu/gps config failed"));
+			return;
+		}
+		Logger.AddSensorConfigJson(TEXT("imu_accel"), FImuGpsMessages::ChannelConfigJson(
+			ImuCfg.RateHz, ImuCfg.AccelNoiseSigma, ImuCfg.AccelBias, ImuCfg.DropoutProb, ImuCfg.LatencyMs));
+		Logger.AddSensorConfigJson(TEXT("imu_gyro"), FImuGpsMessages::ChannelConfigJson(
+			ImuCfg.RateHz, ImuCfg.GyroNoiseSigma, ImuCfg.GyroBias, ImuCfg.DropoutProb, ImuCfg.LatencyMs));
+		Logger.AddSensorConfigJson(TEXT("gps"), FImuGpsMessages::ChannelConfigJson(
+			GpsCfg.RateHz, GpsCfg.PositionNoiseSigmaM, GpsCfg.PositionBiasM, GpsCfg.DropoutProb, GpsCfg.LatencyMs));
+	}
+
 	LidarQueue.SetLatencySeconds(LidarCfg.LatencySeconds());
 	CameraQueue.SetLatencySeconds(CameraCfg.LatencySeconds());
 
@@ -134,6 +157,11 @@ void ASensorRunManager::BeginPlay()
 	Client->Advertise(FCameraMessage::GetImageTopic(), FCameraMessage::GetImageMessageType());
 	Client->Advertise(FCameraMessage::GetCameraInfoTopic(), FCameraMessage::GetCameraInfoMessageType());
 	Client->Connect();
+	if (bImuGpsEnabled)
+	{
+		Client->Advertise(FImuGpsMessages::ImuTopic(), FImuGpsMessages::ImuType());
+		Client->Advertise(FImuGpsMessages::GpsTopic(), FImuGpsMessages::GpsType());
+	}
 	Tf = MakeUnique<FTfPublisher>(Client.Get(), FTfPublisher::MinRateHz);
 	Tf->Advertise();
 
@@ -300,6 +328,119 @@ void ASensorRunManager::UpdateViewCamera()
 	ViewCamera->SetActorLocationAndRotation(Eye, (Look - Eye).Rotation());
 }
 
+void ASensorRunManager::UpdateMotionTruth(float DeltaSeconds)
+{
+	if (!Rover || DeltaSeconds <= 0.0f)
+	{
+		return;
+	}
+	const FVector PosCm = Rover->GetActorLocation();
+	const FQuat Quat = Rover->GetActorQuat();
+	if (bHasPrevMotion)
+	{
+		const FVector VelCmS = (PosCm - PrevPosCm) / DeltaSeconds;
+		const FVector AccelCmS2 = (VelCmS - PrevVelCmS) / DeltaSeconds;
+		// Specific force in the body frame: a - g, with g = (0, 0, -9.80665) m/s^2.
+		const FVector SpecificWorldCm = AccelCmS2 + FVector(0.0, 0.0, 980.665);
+		const FVector BodyCm = Quat.UnrotateVector(SpecificWorldCm);
+		TruthAccelRos = FVector(BodyCm.X, -BodyCm.Y, BodyCm.Z) / 100.0;
+
+		// Body angular velocity from the rotation delta; REP 103 mirror of a
+		// pseudovector across the y axis: (-wx, wy, -wz).
+		const FQuat Delta = PrevQuat.Inverse() * Quat;
+		FVector Axis;
+		double Angle = 0.0;
+		Delta.ToAxisAndAngle(Axis, Angle);
+		if (Angle > PI) { Angle -= 2.0 * PI; }
+		const FVector OmegaUe = Axis * (Angle / DeltaSeconds);
+		TruthGyroRos = FVector(-OmegaUe.X, OmegaUe.Y, -OmegaUe.Z);
+		PrevVelCmS = VelCmS;
+	}
+	PrevPosCm = PosCm;
+	PrevQuat = Quat;
+	bHasPrevMotion = true;
+}
+
+void ASensorRunManager::LogVectorChannel(const TCHAR* Sensor, const FVectorSample& S, int32 First, int32 Count,
+	const FLogRoverPose& Pose, TOptional<double> TPublish)
+{
+	FLogSample L;
+	L.Sensor = Sensor;
+	L.Seq = S.Seq;
+	L.TCapture = S.CaptureTime;
+	L.TPublish = TPublish;
+	L.bDropped = S.bDropped;
+	L.Pose = Pose;
+	L.bHasRangeArrays = true;
+	for (int32 i = First; i < First + Count; ++i)
+	{
+		L.Truth.Add(FSensorValue(S.Truth[i]));
+		L.Published.Add(S.bDropped ? FSensorValue() : FSensorValue(S.Published[i]));
+	}
+	Logger.LogSample(L);
+}
+
+void ASensorRunManager::CaptureImuGps(double T)
+{
+	if (T >= NextImuTime)
+	{
+		const FVectorSample S = Imu.Process(ImuSeq++, T, TruthAccelRos, TruthGyroRos);
+		const FLogRoverPose Pose = CurrentPose();
+		if (S.bDropped)
+		{
+			LogVectorChannel(TEXT("imu_accel"), S, 0, 3, Pose, TOptional<double>());
+			LogVectorChannel(TEXT("imu_gyro"), S, 3, 3, Pose, TOptional<double>());
+		}
+		else
+		{
+			ImuGpsPoses.Add((int64(1) << 40) | S.Seq, Pose);
+			Imu.EnqueueForLatency(S);
+		}
+		NextImuTime += Imu.GetConfig().PeriodSeconds();
+		if (NextImuTime < T - 1.0) { NextImuTime = T + Imu.GetConfig().PeriodSeconds(); }
+	}
+	if (T >= NextGpsTime)
+	{
+		const FRep103Position P = FRep103::ConvertPosition(Rover->GetActorLocation());
+		const FVectorSample S = Gps.Process(GpsSeq++, T, FVector(P.X, P.Y, P.Z));
+		const FLogRoverPose Pose = CurrentPose();
+		if (S.bDropped)
+		{
+			LogVectorChannel(TEXT("gps"), S, 0, 3, Pose, TOptional<double>());
+		}
+		else
+		{
+			ImuGpsPoses.Add((int64(2) << 40) | S.Seq, Pose);
+			Gps.EnqueueForLatency(S);
+		}
+		NextGpsTime += Gps.GetConfig().PeriodSeconds();
+		if (NextGpsTime < T - 1.0) { NextGpsTime = T + Gps.GetConfig().PeriodSeconds(); }
+	}
+}
+
+void ASensorRunManager::ReleaseImuGps(double T)
+{
+	for (const TReleasedSample<FVectorSample>& R : Imu.ReleaseDue(T))
+	{
+		FLogRoverPose Pose;
+		ImuGpsPoses.RemoveAndCopyValue((int64(1) << 40) | R.Seq, Pose);
+		Client->Publish(FImuGpsMessages::ImuTopic(),
+			FImuGpsMessages::BuildImu(R.Payload, Imu.GetConfig(), WallStartSeconds + R.CaptureTime));
+		++ImuPublished;
+		LogVectorChannel(TEXT("imu_accel"), R.Payload, 0, 3, Pose, R.PublishTime);
+		LogVectorChannel(TEXT("imu_gyro"), R.Payload, 3, 3, Pose, R.PublishTime);
+	}
+	for (const TReleasedSample<FVectorSample>& R : Gps.ReleaseDue(T))
+	{
+		FLogRoverPose Pose;
+		ImuGpsPoses.RemoveAndCopyValue((int64(2) << 40) | R.Seq, Pose);
+		Client->Publish(FImuGpsMessages::GpsTopic(),
+			FImuGpsMessages::BuildNavSatFix(R.Payload, Gps.GetConfig(), WallStartSeconds + R.CaptureTime));
+		++GpsPublished;
+		LogVectorChannel(TEXT("gps"), R.Payload, 0, 3, Pose, R.PublishTime);
+	}
+}
+
 void ASensorRunManager::CaptureDemoFrame(double T)
 {
 	// Viewport screenshots contain only the game's own render, never other
@@ -328,7 +469,13 @@ void ASensorRunManager::Tick(float DeltaSeconds)
 	TickSecondsSum += DeltaSeconds;
 
 	const double T = Now();
+	UpdateMotionTruth(DeltaSeconds);
 	CaptureDue(T);
+	if (bImuGpsEnabled)
+	{
+		CaptureImuGps(T);
+		ReleaseImuGps(T);
+	}
 	ReleaseDue(T);
 	CaptureDemoFrame(T);
 
@@ -351,6 +498,17 @@ void ASensorRunManager::Tick(float DeltaSeconds)
 		CameraFrame.ChildFrameId = SensorFrames::CameraLink;
 		CameraFrame.UePositionCm = CameraMountCm;
 		Frames.Add(CameraFrame);
+		if (bImuGpsEnabled)
+		{
+			FTfFrame ImuFrame;
+			ImuFrame.ParentFrameId = SensorFrames::BaseLink;
+			ImuFrame.ChildFrameId = SensorFrames::ImuLink;
+			Frames.Add(ImuFrame);
+			FTfFrame GpsFrame;
+			GpsFrame.ParentFrameId = SensorFrames::BaseLink;
+			GpsFrame.ChildFrameId = SensorFrames::GpsLink;
+			Frames.Add(GpsFrame);
+		}
 		Tf->Tick(WallStartSeconds + T, Frames);
 	}
 
@@ -381,9 +539,11 @@ void ASensorRunManager::FinishRun(const FString& Reason)
 	const FString Done = FString::Printf(
 		TEXT("status=%s\nreason=%s\nelapsed_s=%.3f\nlidar_scans_produced=%lld\nlidar_scans_published=%lld\n")
 		TEXT("camera_frames_produced=%lld\ncamera_frames_dropped=%lld\ncamera_frames_published=%lld\n")
-		TEXT("camera_images_written=%lld\ntf_published=%d\nticks=%lld\navg_frame_time_ms=%.3f\nseed=%lld\n"),
+		TEXT("camera_images_written=%lld\nimu_samples_produced=%lld\nimu_published=%lld\ngps_samples_produced=%lld\ngps_published=%lld\n")
+		TEXT("tf_published=%d\nticks=%lld\navg_frame_time_ms=%.3f\nseed=%lld\n"),
 		bComplete ? TEXT("PASS") : TEXT("FAIL"), *Reason, Elapsed, ScansProduced, ScansPublished,
-		FramesProduced, FramesDropped, FramesPublished, ImagesWritten, Tf ? Tf->GetPublishCount() : 0,
+		FramesProduced, FramesDropped, FramesPublished, ImagesWritten, ImuSeq, ImuPublished, GpsSeq, GpsPublished,
+		Tf ? Tf->GetPublishCount() : 0,
 		TickCount, AvgFrameMs, Seed);
 	FFileHelper::SaveStringToFile(Done, *FPaths::Combine(RunDir, TEXT("run_done.txt")));
 	UE_LOG(LogSensorRun, Log, TEXT("E2E run finished (%s): %s"), *Reason, *Done.Replace(TEXT("\n"), TEXT(" ")));

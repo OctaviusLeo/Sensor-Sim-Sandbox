@@ -136,7 +136,7 @@ if (-not $SkipBuild) {
 }
 
 # --- 4. Bag recording ---------------------------------------------------------
-$topics = '/lidar/points /camera/image/compressed /camera/camera_info /tf'
+$topics = '/lidar/points /camera/image/compressed /camera/camera_info /tf /imu /gps/fix'
 $bagProc = Start-WslDetached 'bag' "exec ros2 bag record -s sqlite3 -o '$(Convert-ToWslPath $BagDir)' $topics > '$(Convert-ToWslPath (Join-Path $LogDir 'bag.log'))' 2>&1"
 Start-Sleep -Seconds 5
 Write-Step "bag recording started -> $BagDir"
@@ -173,6 +173,11 @@ foreach ($t in @('/lidar/points', '/camera/image/compressed')) {
     $f = Convert-ToWslPath (Join-Path $HzDir (($t.Trim('/') -replace '/', '_') + '.txt'))
     $name = 'hz_' + ($t.Trim('/') -replace '/', '_')
     $hzProcs += Start-WslDetached $name "timeout -s INT $HzWindowSec stdbuf -oL ros2 topic hz $t > '$f' 2>&1; echo done >> '$f'"
+}
+# One message each from the M5 topics (Requirements 11.1, 11.2).
+foreach ($t in @('/imu', '/gps/fix')) {
+    $f = Convert-ToWslPath (Join-Path $LogDir ('echo_' + ($t.Trim('/') -replace '/', '_') + '.txt'))
+    $hzProcs += Start-WslDetached ('echo_' + ($t.Trim('/') -replace '/', '_')) "timeout 30 ros2 topic echo --once $t > '$f' 2>&1; true"
 }
 
 foreach ($h in $hzProcs) { $null = $h.WaitForExit(($HzWindowSec + 30) * 1000) }

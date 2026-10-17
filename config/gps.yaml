@@ -1,0 +1,9 @@
+# GPS_Model configuration (M5, Requirement 11.2). Noise and bias in meters, bias on each axis.
+rate_hz: 10                  # 0.1-100
+position_noise_sigma_m: 0.5  # 0-100
+position_bias_m: 0.3         # -100..100
+dropout_prob: 0.05           # whole-sample, 0-1
+latency_ms: 100              # 0-1000
+origin_lat_deg: 47.6205      # geodetic origin of the odom frame (x east, y north, z up)
+origin_lon_deg: -122.3493
+origin_alt_m: 50.0

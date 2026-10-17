@@ -196,3 +196,34 @@ def test_property17_rejects_missing_bag(tmp_path, capsys):
     assert rc == 2
     assert "missing_bag" in capsys.readouterr().err
     assert not (tmp_path / "out" / "summary.md").exists()
+
+
+# Feature: sensor-sim-sandbox, Property 14: Analysis recovers injected error parameters (IMU/GPS channels)
+@PROPS
+@given(
+    channel=st.sampled_from([("imu_accel", 3), ("imu_gyro", 3), ("gps", 3)]),
+    seed=st.integers(min_value=0, max_value=2**31),
+    bias=st.floats(min_value=-1.0, max_value=1.0),
+    sigma=st.floats(min_value=0.001, max_value=2.0),
+    dropout=st.floats(min_value=0.0, max_value=0.5),
+    latency_ms=st.integers(min_value=0, max_value=1000),
+)
+def test_property14_imu_gps_recovers_injected_parameters(channel, seed, bias, sigma, dropout, latency_ms):
+    from sensorsim_analysis.synthetic import make_vector_samples, vector_meta
+
+    sensor, axes = channel
+    # 10,000 samples: whole-sample dropout +-2 pp is > 4 standard errors at p = 0.5
+    # (n >= 40,000 p (1 - p), design "Sample sizes"); sigma uses >= 15,000 values.
+    inj = Injected(bias=bias, sigma=sigma, dropout=dropout, latency_s=latency_ms / 1000.0,
+                   rate_hz=50.0, scans=10000)
+    d = _tmpdir()
+    try:
+        write_run_log(d / "log.jsonl", vector_meta(sensor, inj, seed), make_vector_samples(sensor, inj, axes, seed))
+        m = compute_metrics(load_run_log(d / "log.jsonl"))[sensor]
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    assert abs(m.bias - bias) <= 5 * sigma / math.sqrt(m.error_samples)
+    assert abs(m.std - sigma) <= 0.10 * sigma
+    assert abs(m.measured_dropout - dropout) <= 0.02
+    assert m.measured_latency_ms == pytest.approx(latency_ms, abs=1e-6)
+    assert (m.configured_bias, m.configured_noise_sigma, m.configured_dropout) == (bias, sigma, dropout)

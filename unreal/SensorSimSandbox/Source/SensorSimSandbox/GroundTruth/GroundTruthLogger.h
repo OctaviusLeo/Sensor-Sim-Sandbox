@@ -129,7 +129,8 @@ public:
 		const FString& CommitSha,
 		const FLidarConfig& LidarConfig,
 		const FString& CameraSamplingInterval,
-		const FCameraConfig* CameraConfig = nullptr);
+		const FCameraConfig* CameraConfig = nullptr,
+		const TArray<TPair<FString, FString>>* ExtraSensorConfigs = nullptr);
 
 	/** Serialize one sample record line (no trailing newline). */
 	static FString SerializeSample(const FLogSample& Sample, double TWritten);
@@ -226,6 +227,12 @@ public:
 	/** EndRun: flush the sink. Returns false on a flush failure (5.5). */
 	bool EndRun();
 
+	/**
+	 * Add `"Name": <ConfigJson>` to the header's sensor_config (IMU / GPS
+	 * channels, M5). Call before BeginRun.
+	 */
+	void AddSensorConfigJson(const FString& Name, const FString& ConfigJson) { ExtraSensorConfigs.Emplace(Name, ConfigJson); }
+
 	/** True while the run is active (BeginRun succeeded, not stopped/ended). */
 	bool IsRunning() const { return bRunning; }
 
@@ -251,6 +258,7 @@ private:
 	double LastT = 0.0;
 	bool bHasLastT = false;
 	int64 SamplesWritten = 0;
+	TArray<TPair<FString, FString>> ExtraSensorConfigs;
 
 	/** Emit the write-failure error (log + stored) and stop the run (5.5). */
 	void FailRun(const FString& Context);

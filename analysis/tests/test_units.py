@@ -146,7 +146,7 @@ def test_summary_formatting_and_atomic_write(tmp_path):
     metrics = compute_metrics(load_run_log(tmp_path / "l.jsonl"))
     text = render_summary(metrics, command="cmd", seed=3, commit="c", run_log="l.jsonl",
                           rates=[RateMeasurement("/lidar/points", math.nan, "bag")])
-    assert "| lidar | 0.250000 | 0.250000 | 0.353553 | 6 |" in text
+    assert "| lidar | 0.250000 | n/a | 0.250000 | 0.353553 | 6 |" in text
     assert "| `/lidar/points` | n/a | 10 | n/a | bag |" in text
     p = write_summary(tmp_path / "out" / "summary.md", text)
     assert p.read_text(encoding="utf-8") == text

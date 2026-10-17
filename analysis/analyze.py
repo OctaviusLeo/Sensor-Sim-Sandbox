@@ -26,6 +26,7 @@ from sensorsim_analysis.plots import make_plots  # noqa: E402
 from sensorsim_analysis.summary import RateMeasurement, render_summary, write_summary  # noqa: E402
 
 TOPICS = ("/lidar/points", "/camera/image/compressed")
+BAG_TOPICS = TOPICS + ("/imu", "/gps/fix")
 
 
 def _load_yaml(path: Path) -> dict:
@@ -99,7 +100,9 @@ def run(argv: list[str] | None = None) -> int:
             bag_path = Path(bag_s)
             if bag_path.exists() or args.bag:
                 bag = load_bag(bag_path)
-                for topic in TOPICS:
+                for topic in BAG_TOPICS:
+                    if topic not in bag.timestamps_ns and topic not in TOPICS:
+                        continue
                     ts = bag.timestamps_ns.get(topic, [])
                     rate = achieved_rate_hz([t * 1e-9 for t in ts])
                     rates.append(RateMeasurement(topic, rate, f"bag receive timestamps ({len(ts)} msgs)"))

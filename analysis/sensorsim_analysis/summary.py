@@ -59,15 +59,15 @@ def render_summary(
         "",
         "## Per-sensor metrics",
         "",
-        "| Sensor | Bias | Std | RMSE | Error samples | Configured noise σ "
+        "| Sensor | Bias | Configured bias | Std | RMSE | Error samples | Configured noise σ "
         "| Measured dropout | Configured dropout | Measured latency (ms) "
         "| Configured latency (ms) | Achieved rate (Hz) | Published |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for name in sorted(metrics):
         m = metrics[name]
         lines.append(
-            f"| {m.sensor} | {fmt(m.bias)} | {fmt(m.std)} | {fmt(m.rmse)} | {m.error_samples} "
+            f"| {m.sensor} | {fmt(m.bias)} | {fmt(m.configured_bias, 4)} | {fmt(m.std)} | {fmt(m.rmse)} | {m.error_samples} "
             f"| {fmt(m.configured_noise_sigma, 4)} | {fmt(m.measured_dropout)} "
             f"| {fmt(m.configured_dropout, 4)} | {fmt(m.measured_latency_ms, 3)} "
             f"| {fmt(m.configured_latency_ms, 1)} | {fmt(m.achieved_rate_hz, 4)} "
@@ -75,7 +75,8 @@ def render_summary(
         )
     lines += [
         "",
-        "Units: lidar error in meters, camera error in 8-bit intensity levels "
+        "Units: lidar and gps error in meters, imu_accel in m/s², imu_gyro in rad/s, "
+        "camera error in 8-bit intensity levels "
         "(sampled frames, published JPEG vs truth PNG, so JPEG compression error is included). "
         "Rate is `(n - 1) / T` over `t_publish`.",
     ]

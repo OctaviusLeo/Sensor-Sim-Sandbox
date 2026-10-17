@@ -45,6 +45,39 @@ def make_lidar_samples(inj: Injected, seed: int) -> list[Sample]:
     return samples
 
 
+def make_vector_samples(sensor: str, inj: Injected, axes: int, seed: int) -> list[Sample]:
+    """IMU/GPS-style channel: `axes` values per sample, whole-sample dropout."""
+    rng = np.random.default_rng(seed)
+    samples = []
+    period = 1.0 / inj.rate_hz
+    for k in range(inj.scans):
+        truth = rng.normal(0.0, 10.0, size=axes)
+        noise = rng.normal(0.0, inj.sigma, size=axes) if inj.sigma > 0 else np.zeros(axes)
+        dropped = bool(rng.random() < inj.dropout)
+        published = np.full(axes, np.nan) if dropped else truth + inj.bias + noise
+        t_capture = k * period
+        t_publish = None if dropped else t_capture + inj.latency_s
+        samples.append(Sample(sensor, k, t_capture if dropped else t_publish, t_capture, t_publish,
+                              dropped, truth=truth, published=published))
+    return samples
+
+
+def vector_meta(sensor: str, inj: Injected, seed: int) -> dict:
+    return {
+        "seed": seed,
+        "commit": "synthetic",
+        "sensor_config": {
+            sensor: {
+                "rate_hz": inj.rate_hz,
+                "noise_sigma": inj.sigma,
+                "bias": inj.bias,
+                "dropout_prob": inj.dropout,
+                "latency_ms": inj.latency_s * 1000.0,
+            }
+        },
+    }
+
+
 def lidar_meta(inj: Injected, seed: int) -> dict:
     return {
         "seed": seed,

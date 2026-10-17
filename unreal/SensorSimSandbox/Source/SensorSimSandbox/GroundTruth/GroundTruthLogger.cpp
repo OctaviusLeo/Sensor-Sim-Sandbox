@@ -114,7 +114,8 @@ FString FGroundTruthLogFormat::SerializeHeader(
 	const FString& CommitSha,
 	const FLidarConfig& LidarConfig,
 	const FString& CameraSamplingInterval,
-	const FCameraConfig* CameraConfig)
+	const FCameraConfig* CameraConfig,
+	const TArray<TPair<FString, FString>>* ExtraSensorConfigs)
 {
 	// {"type":"run_meta","seed":...,"commit":"...","sensor_config":{"lidar":{...}}[,"camera_sampling_interval":"1/10"]}
 	FString S = TEXT("{");
@@ -126,6 +127,13 @@ FString FGroundTruthLogFormat::SerializeHeader(
 	if (CameraConfig != nullptr)
 	{
 		S += FString::Printf(TEXT(",\"camera\":%s"), *SerializeCameraConfigObject(*CameraConfig));
+	}
+	if (ExtraSensorConfigs != nullptr)
+	{
+		for (const TPair<FString, FString>& Extra : *ExtraSensorConfigs)
+		{
+			S += FString::Printf(TEXT(",%s:%s"), *JsonString(Extra.Key), *Extra.Value);
+		}
 	}
 	S += TEXT("}");
 	// camera_sampling_interval present ONLY when camera frames are sampled (5.3).
@@ -262,7 +270,7 @@ bool FGroundTruthLogger::BeginRun(
 	}
 
 	const FString Header = FGroundTruthLogFormat::SerializeHeader(
-		Seed, CommitSha, LidarConfig, CameraSamplingInterval, CameraConfig);
+		Seed, CommitSha, LidarConfig, CameraSamplingInterval, CameraConfig, &ExtraSensorConfigs);
 	if (!Sink->WriteLine(Header))
 	{
 		FailRun(TEXT("could not write metadata header"));
