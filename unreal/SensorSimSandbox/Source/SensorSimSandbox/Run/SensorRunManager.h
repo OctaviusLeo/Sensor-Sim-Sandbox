@@ -90,7 +90,7 @@ private:
 
 	FString RunDir;
 	FString DemoFramesDir;
-	double NextDemoTime = 10.0; // start 10 s in, once the rover is moving
+	double NextDemoTime = 100.0; // after the 60 s `ros2 topic hz` windows, so screenshots do not perturb them
 	int32 DemoFrameIndex = 0;
 	int64 Seed = 1234;
 	int32 MinCameraFrames = 2000;

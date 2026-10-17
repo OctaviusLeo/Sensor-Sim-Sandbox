@@ -303,7 +303,8 @@ void ASensorRunManager::UpdateViewCamera()
 void ASensorRunManager::CaptureDemoFrame(double T)
 {
 	// Viewport screenshots contain only the game's own render, never other
-	// windows on the desktop. 100 frames at 10 fps from t = 10 s.
+	// windows on the desktop. 100 frames at 10 fps from t = 100 s (after the
+	// rate-measurement windows; screenshot readback costs frame time).
 	constexpr int32 DemoFrames = 100;
 	if (DemoFramesDir.IsEmpty() || DemoFrameIndex >= DemoFrames || T < NextDemoTime)
 	{
