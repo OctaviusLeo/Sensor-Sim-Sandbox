@@ -22,6 +22,9 @@ public class SensorSimSandbox : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
+			// Camera_Model scene capture + render-target GPU readback (task 13).
+			"RenderCore",
+			"RHI",
 			// Rosbridge WebSocket transport (Requirement 6.2) and JSON op framing.
 			"WebSockets",
 			"Json",

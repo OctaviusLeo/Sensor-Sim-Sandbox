@@ -1,0 +1,14 @@
+# Camera_Model configuration (CameraConfig). Bounds enforced via the shared
+# validation contract (FSensorBoundSet): any out-of-bound value is rejected, the
+# offending parameter is named, and the last valid config is retained
+# (Requirement 4.1, 4.2). These are the design's Gate A values
+# (design.md "Gate A run configuration"): 640x480 at 10 Hz, per-pixel Gaussian
+# noise sigma 5.0 intensity levels, 5% whole-frame dropout, 200 ms latency, and
+# frames sampled to disk 1 in 10.
+width: 640                      # int, 1-7680
+height: 480                     # int, 1-7680
+rate_hz: 10.0                   # float, 0.1-100.0
+pixel_noise_sigma: 5.0          # float, 0.0-255.0 (intensity levels)
+frame_dropout_prob: 0.05        # float, 0.0-1.0
+latency_ms: 200                 # int, 0-1000
+camera_sampling_interval: "1/10" # frames logged per frames produced (Req 5.3)
