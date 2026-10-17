@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Sensors/LidarConfig.h"
+#include "Sensors/CameraConfig.h"
 #include "Pipeline/SensorPipeline.h"
 
 /**
@@ -127,7 +128,8 @@ public:
 		int64 Seed,
 		const FString& CommitSha,
 		const FLidarConfig& LidarConfig,
-		const FString& CameraSamplingInterval);
+		const FString& CameraSamplingInterval,
+		const FCameraConfig* CameraConfig = nullptr);
 
 	/** Serialize one sample record line (no trailing newline). */
 	static FString SerializeSample(const FLogSample& Sample, double TWritten);
@@ -209,7 +211,8 @@ public:
 		const FLidarConfig& LidarConfig,
 		const FString& CommitSha,
 		TUniquePtr<ILogRunSink> Sink,
-		const FString& CameraSamplingInterval = FString());
+		const FString& CameraSamplingInterval = FString(),
+		const FCameraConfig* CameraConfig = nullptr);
 
 	/**
 	 * LogSample: append one sample record. `t` is derived here as the record's

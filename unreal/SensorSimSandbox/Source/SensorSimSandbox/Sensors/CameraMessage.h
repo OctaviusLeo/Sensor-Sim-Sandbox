@@ -138,6 +138,19 @@ public:
 	static bool EncodeRgbaToJpeg(int32 Width, int32 Height, const TArray<uint8>& RgbaPixels, TArray<uint8>& OutJpeg, int32 Quality = 90);
 
 	/**
+	 * Encode a Ground_Truth RGBA frame to lossless PNG bytes using Unreal's
+	 * ImageWrapper module (EImageFormat::PNG). The design's logging format saves
+	 * the truth frame as a `.png` and the published frame as a `.jpg` for a
+	 * sampled frame ("frames/cam_000017.png" / "frames/cam_000017_pub.jpg"), so
+	 * the Ground_Truth is stored losslessly. This is an engine-dependent step
+	 * (the ImageWrapper module) exactly like EncodeRgbaToJpeg; it is CPU-only
+	 * (libpng) so it works under -nullrhi. Returns false (OutPng empty) when the
+	 * pixel buffer size does not match Width*Height*4 or the encoder is
+	 * unavailable.
+	 */
+	static bool EncodeRgbaToPng(int32 Width, int32 Height, const TArray<uint8>& RgbaPixels, TArray<uint8>& OutPng);
+
+	/**
 	 * Build the sensor_msgs/CompressedImage `msg` JSON object: header
 	 * (stamp = StampSeconds, frame_id = camera_link), format = "jpeg", and
 	 * `data` as the base64 of `JpegBytes`. `FrameId` defaults to the camera

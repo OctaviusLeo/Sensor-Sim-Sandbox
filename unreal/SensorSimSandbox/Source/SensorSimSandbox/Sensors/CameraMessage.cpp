@@ -156,6 +156,46 @@ bool FCameraMessage::EncodeRgbaToJpeg(int32 Width, int32 Height, const TArray<ui
 	return true;
 }
 
+bool FCameraMessage::EncodeRgbaToPng(int32 Width, int32 Height, const TArray<uint8>& RgbaPixels, TArray<uint8>& OutPng)
+{
+	OutPng.Reset();
+
+	if (Width <= 0 || Height <= 0)
+	{
+		return false;
+	}
+	const int64 Expected = static_cast<int64>(Width) * static_cast<int64>(Height) * 4;
+	if (RgbaPixels.Num() != Expected)
+	{
+		return false;
+	}
+
+	IImageWrapperModule& Module = FModuleManager::LoadModuleChecked<IImageWrapperModule>(TEXT("ImageWrapper"));
+	TSharedPtr<IImageWrapper> Wrapper = Module.CreateImageWrapper(EImageFormat::PNG);
+	if (!Wrapper.IsValid())
+	{
+		return false;
+	}
+
+	// Row-major RGBA, 8 bits/channel (FCameraFrameBuffer layout) — same as the
+	// JPEG path. PNG is lossless so the stored Ground_Truth is byte-exact.
+	if (!Wrapper->SetRaw(RgbaPixels.GetData(), RgbaPixels.Num(), Width, Height, ERGBFormat::RGBA, 8))
+	{
+		return false;
+	}
+
+	// PNG ignores the quality argument; pass a nominal value.
+	const TArray64<uint8>& Compressed = Wrapper->GetCompressed(100);
+	if (Compressed.Num() <= 0)
+	{
+		return false;
+	}
+
+	OutPng.SetNumUninitialized(Compressed.Num());
+	FMemory::Memcpy(OutPng.GetData(), Compressed.GetData(), Compressed.Num());
+	return true;
+}
+
 TSharedRef<FJsonObject> FCameraMessage::BuildCompressedImageMessage(const TArray<uint8>& JpegBytes, double StampSeconds, const FString& FrameId)
 {
 	const FString Frame = FrameId.IsEmpty() ? CameraFrameId() : FrameId;
