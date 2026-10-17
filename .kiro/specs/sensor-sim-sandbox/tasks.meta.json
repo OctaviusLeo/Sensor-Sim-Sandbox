@@ -1,0 +1,120 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Scaffold the repository and governance documents": [
+      {
+        "executionId": "fd833346-1665-4453-8132-62830f2409aa",
+        "chatSessionId": "sess_80770fb6-7c55-4496-91b4-11b529c4eb1d",
+        "timestamp": 1791805331720
+      },
+      {
+        "executionId": "fd833346-1665-4453-8132-62830f2409aa",
+        "chatSessionId": "sess_80770fb6-7c55-4496-91b4-11b529c4eb1d",
+        "timestamp": 1791805337958
+      },
+      {
+        "executionId": "fd833346-1665-4453-8132-62830f2409aa",
+        "chatSessionId": "sess_80770fb6-7c55-4496-91b4-11b529c4eb1d",
+        "timestamp": 1791805488761
+      }
+    ],
+    "23. Checkpoint — M5": [
+      {
+        "executionId": "fd833346-1665-4453-8132-62830f2409aa",
+        "chatSessionId": "sess_80770fb6-7c55-4496-91b4-11b529c4eb1d",
+        "timestamp": 1791805332338
+      }
+    ],
+    "3. Record the chosen platform and evidence in design.md": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937037139
+      }
+    ],
+    "16.3 Write Hypothesis property tests for the analysis core": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038098
+      }
+    ],
+    "17. Generate plots and the summary file": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038196
+      }
+    ],
+    "18.1 Add a repo script that measures the lidar rate (`ros2 topic hz /lidar/points`, 60 s) and camera rate (`ros2 topic hz /camera/image/compressed`, 60 s at 640×480) and records each Measured_Value against the 10 Hz target with command, seed, and full commit hash (_Requirements: 10.2, 10.3, 0.1_).": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038256
+      }
+    ],
+    "18.2 Fill the README: description, demo GIF, architecture diagram, run instructions, the generated measured-results table, per-suite test commands, and known limitations; confirm Gate A — end-to-end run from rover start to Summary_File output with no unhandled failure, publishing at a stated measured rate, all unit tests passing (_Requirements: 10.1, 10.4, 9.6, 0.4_).": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038300
+      }
+    ],
+    "18.3 Add GitHub Actions CI (`.github/workflows/ci.yml`) that runs pytest on push and pull request and reports a failed status when any test fails (_Requirements: 9.3, 9.4, 9.5_).": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038358
+      }
+    ],
+    "18.4 Write pytest unit tests for loaders, plots, and summary wiring": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038410
+      }
+    ],
+    "19. Checkpoint — Gate A": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038477
+      }
+    ],
+    "20.1 **[ME]** Implement `IMU_Model` reusing the shared seeded pipeline with configurable noise and bias per axis, publishing `sensor_msgs/Imu` via the Rosbridge_Client (_Requirements: 11.1_).": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038511
+      }
+    ],
+    "20.2 Write Unreal Automation property tests reusing pipeline properties for IMU": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038551
+      }
+    ],
+    "21.1 Implement `GPS_Model` reusing the shared pipeline with configurable noise and bias in meters, publishing `sensor_msgs/NavSatFix` via the Rosbridge_Client (_Requirements: 11.2_).": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038594
+      }
+    ],
+    "21.2 Write Unreal Automation example tests for GPS config bounds and message build": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038632
+      }
+    ],
+    "22.1 Write Hypothesis property test extending analysis recovery to IMU/GPS": [
+      {
+        "executionId": "ebcac057-266a-48ed-bf24-3358bc9695f1",
+        "chatSessionId": "sess_97c1aee3-818f-45d2-8c42-bf997edbdfa5",
+        "timestamp": 1791937038670
+      }
+    ]
+  }
+}
