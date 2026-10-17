@@ -1,0 +1,16 @@
+# Rosbridge_Client connection config (Requirement 6.3 — host/port changeable
+# WITHOUT recompilation). Read at runtime by FRosbridgeConfig::Resolve().
+#
+# Priority order (highest wins):
+#   1. command-line  -BridgeHost=<h> -BridgePort=<n> -BridgePath=<p>
+#   2. this file (config/bridge.yaml)
+#   3. built-in defaults (127.0.0.1:9090, path "")
+#
+# M0 finding: the real rosbridge_server is launched with url_path:=// because
+# UE's bundled libwebsockets emits `GET //` for a root ws:// URL. The default
+# empty path below produces ws://host:port/ which libwebsockets turns into that
+# `GET //` request, matching the server launch. Leave `path` empty for the
+# proven live round-trip; override only for a stub server on a non-root path.
+host: 127.0.0.1   # rosbridge host (rosbridge runs in WSL, reached from Windows)
+port: 9090        # rosbridge WebSocket port
+path: ""          # URL path after host:port (empty -> ws://host:port/ -> GET //)
