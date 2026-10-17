@@ -107,7 +107,8 @@ function Wait-ForNoUnrealProcess {
 
 # --- 1. Clean tree + commit -------------------------------------------------
 Set-Location $RepoRoot
-$dirty = (& git status --porcelain --untracked-files=no) -join "`n"
+# Generated outputs (results/, docs/media/) are rewritten by every run, so they are not part of the check.
+$dirty = (& git status --porcelain --untracked-files=no -- . ':!results' ':!docs/media') -join "`n"
 if ($dirty -and -not $AllowDirty) { Fail "tracked tree is not clean:`n$dirty" }
 $Commit = (& git rev-parse HEAD).Trim()
 Write-Step "run_id=$RunId commit=$Commit seed=$Seed"
