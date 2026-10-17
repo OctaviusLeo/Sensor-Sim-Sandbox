@@ -25,6 +25,8 @@ public class SensorSimSandbox : ModuleRules
 			// Camera_Model scene capture + render-target GPU readback (task 13).
 			"RenderCore",
 			"RHI",
+			// Camera CompressedImage JPEG encoding via the image wrapper (task 14).
+			"ImageWrapper",
 			// Rosbridge WebSocket transport (Requirement 6.2) and JSON op framing.
 			"WebSockets",
 			"Json",

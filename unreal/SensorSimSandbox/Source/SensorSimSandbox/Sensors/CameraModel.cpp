@@ -9,6 +9,7 @@
 #include "Engine/Scene.h"
 #include "TextureResource.h"
 #include "RHI.h"
+#include "Sensors/CameraMessage.h"   // FCameraMessage::HorizontalFovDeg (calibration source of truth)
 
 DEFINE_LOG_CATEGORY_STATIC(LogCameraModel, Log, All);
 
@@ -29,6 +30,11 @@ ACameraModel::ACameraModel()
 	// not every frame, so the Ground_Truth is tied to the capture time.
 	CaptureComponent->bCaptureEveryFrame = false;
 	CaptureComponent->bCaptureOnMovement = false;
+	// Pin the horizontal FOV to the SAME constant the CameraInfo intrinsics are
+	// computed from (FCameraMessage::HorizontalFovDeg), so the published
+	// calibration (K/P) matches the actual projection used to render the frame
+	// (Requirement 4.4). FOVAngle is Unreal's HORIZONTAL field of view.
+	CaptureComponent->FOVAngle = static_cast<float>(FCameraMessage::HorizontalFovDeg);
 }
 
 FSensorConfigValidationResult ACameraModel::Initialise(int64 InRunSeed, const FCameraConfig& Config, const FString& InSensorName)

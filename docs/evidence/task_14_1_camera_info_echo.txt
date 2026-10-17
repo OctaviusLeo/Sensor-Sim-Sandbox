@@ -1,0 +1,69 @@
+# Task 14.1 — camera CompressedImage + CameraInfo publish evidence (Requirements 4.3, 4.4)
+# Generated: 2026-10-17T12:39:54.1438027-04:00
+# Command: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\run_camera_publish.ps1
+# Commit:  dc9751d380737d98520a530a5d7a8a95fad4e402
+# Engine:  C:\Program Files (x86)\UE_5.8
+
+## Messages built in the editor (format / jpeg bytes / CameraInfo intrinsics):
+[2026.10.17-16.39.44:142][  0]LogCameraPublish: CameraPublish built CompressedImage: format='jpeg' jpeg_bytes=32340 frame=640x480; CameraInfo: w=640 h=480 fx=320.000 fy=320.000 cx=320.000 cy=240.000 (hfov=90.0 deg)
+
+## Live `ros2 topic echo --once /camera/camera_info` (WSL):
+header:
+  stamp:
+    sec: 0
+    nanosec: 0
+  frame_id: camera_link
+height: 480
+width: 640
+distortion_model: plumb_bob
+d:
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+k:
+- 320.00000000000006
+- 0.0
+- 320.0
+- 0.0
+- 320.00000000000006
+- 240.0
+- 0.0
+- 0.0
+- 1.0
+r:
+- 1.0
+- 0.0
+- 0.0
+- 0.0
+- 1.0
+- 0.0
+- 0.0
+- 0.0
+- 1.0
+p:
+- 320.00000000000006
+- 0.0
+- 320.0
+- 0.0
+- 0.0
+- 320.00000000000006
+- 240.0
+- 0.0
+- 0.0
+- 0.0
+- 1.0
+- 0.0
+binning_x: 0
+binning_y: 0
+roi:
+  x_offset: 0
+  y_offset: 0
+  height: 0
+  width: 0
+  do_rectify: false
+---
+
+## Received /camera/image/compressed decoded JPEG dimensions:
+640x480 bytes=32340
