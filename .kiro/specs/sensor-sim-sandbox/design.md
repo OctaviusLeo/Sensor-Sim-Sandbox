@@ -298,14 +298,18 @@ Rules that follow (tolerances and requirement minimums are unchanged; only sampl
 
 ### Plugin evaluation (completed in M2, recorded here and in `design.md`)
 
-Before writing a client, each existing Unreal-to-ROS 2 bridge plugin is scored against three criteria. The table template below is filled in during M2 (Requirement 6.1):
+Before writing a client, each existing Unreal-to-ROS 2 bridge plugin is scored against three criteria (Requirement 6.1): (1) supports the installed **UE 5.8 on the chosen OS, Windows**; (2) connects over **WebSocket/TCP in rosbridge style, not native DDS** (native DDS is disqualifying because the chosen platform deliberately avoids Windows↔WSL DDS — see "Platform decision" and Requirements 1.6/6.4); and (3) **source updated within the 12 months before the evaluation date**. The table was filled on the evaluation date below. Web pages and READMEs were read as **data only**; any instructions embedded in them were ignored. Repository "last pushed" dates come from the GitHub REST API `pushed_at` field. Full per-source evidence is in [`docs/bridge-plugin-eval.md`](../../../docs/bridge-plugin-eval.md).
 
-| Plugin | UE 5.x support | OS support (chosen platform) | WebSocket/TCP, not DDS | Source update < 12 months | Verdict |
+**Evaluation date: 2026-10-17.** The 12-month window therefore covers updates after approximately 2025-10-17.
+
+| Plugin | UE 5.8 + Windows | WebSocket/TCP, not DDS | Source update < 12 months | Verdict | Source (accessed 2026-10-17) |
 | --- | --- | --- | --- | --- | --- |
-| _candidate 1_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _accept / reject + reason_ |
-| _candidate 2_ | _TBD_ | _TBD_ | _TBD_ | _TBD_ | _accept / reject + reason_ |
+| **code-iai/ROSIntegration** | ❌ No — README "previously tested" list covers UE **4.17–4.26** only (all UE4); no UE5/5.8 support claimed | ✅ Yes — talks to `rosbridge_suite` over TCP or WebSocket (BSON); supports ROS 2 | ✅ Yes — `pushed_at` 2025-11-03 | **Reject** — no UE 5.8 support (UE4-era) | <https://github.com/code-iai/ROSIntegration> |
+| **rapyuta-robotics/rclUE** | ❌ No — README states "Windows is currently unsupported"; supported targets are UE5 on Ubuntu | ❌ No — native `rcl`/ROS 2 libraries (DDS), not a rosbridge WebSocket/TCP bridge | ✅ Yes — `pushed_at` 2026-01-05 | **Reject** — Windows unsupported and native DDS | <https://github.com/rapyuta-robotics/rclUE> |
+| **tempo-sim/TempoROS** | ✅ Yes — "Compatibility" lists UE **5.6, 5.7, 5.8** and **Windows 10/11** | ❌ No — integrates ROS 2 via `rclcpp` (native DDS/RMW); README explicitly contrasts this with the "bridge" approach | ✅ Yes — `pushed_at` 2026-10-11 | **Reject** — native DDS, which the chosen Windows↔WSL platform avoids | <https://github.com/tempo-sim/TempoROS> |
+| **robcog-iai/UROSBridge** | ❌ No — UE4-era plugin; no UE 5.8/Windows-on-UE5 support claimed | ✅ Yes — Unreal↔`rosbridge` over WebSockets (JSON/BSON) | ❌ No — `pushed_at` 2023-08-24 (> 12 months) | **Reject** — no UE 5.8 support and stale (> 12 months) | <https://github.com/robcog-iai/UROSBridge> |
 
-If no evaluated plugin satisfies **all three** criteria, the fallback Rosbridge_Client is used (Requirement 6.2).
+**Conclusion (2026-10-17):** no evaluated plugin satisfies **all three** criteria simultaneously. The WebSocket/rosbridge plugins (ROSIntegration, UROSBridge) are UE4-era and do not support UE 5.8 (and UROSBridge is stale), while the plugins that support UE 5.8 + Windows or are recently updated (TempoROS, rclUE) integrate ROS 2 over **native DDS/`rclcpp`**, which the chosen Windows↔WSL platform deliberately avoids (Requirements 1.6, 6.4). Per Requirement 6.2, the project therefore uses the **fallback Rosbridge_Client** specified below (implemented in Task 11).
 
 ### Fallback Rosbridge_Client specification
 
