@@ -175,9 +175,10 @@ void ASensorRunManager::CaptureDue(double T)
 		const int64 Seq = P.Scan.Seq;
 		LidarQueue.Enqueue(Seq, T, P);
 		++ScansProduced;
-		// Keep the schedule; if the game fell more than a period behind, resync.
+		// Keep the schedule (catch up after a hitch, one capture per tick); only
+		// resync after falling more than a second behind.
 		NextLidarTime += LidarPeriod;
-		if (NextLidarTime < T) { NextLidarTime = T + LidarPeriod; }
+		if (NextLidarTime < T - 1.0) { NextLidarTime = T + LidarPeriod; }
 	}
 
 	const double CameraPeriod = Camera->FramePeriodSeconds();
@@ -206,7 +207,7 @@ void ASensorRunManager::CaptureDue(double T)
 			CameraQueue.Enqueue(Seq, T, P);
 		}
 		NextCameraTime += CameraPeriod;
-		if (NextCameraTime < T) { NextCameraTime = T + CameraPeriod; }
+		if (NextCameraTime < T - 1.0) { NextCameraTime = T + CameraPeriod; }
 	}
 }
 
