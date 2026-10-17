@@ -175,9 +175,11 @@ foreach ($t in @('/lidar/points', '/camera/image/compressed')) {
     $hzProcs += Start-WslDetached $name "timeout -s INT $HzWindowSec stdbuf -oL ros2 topic hz $t > '$f' 2>&1; echo done >> '$f'"
 }
 # One message each from the M5 topics (Requirements 11.1, 11.2).
-foreach ($t in @('/imu', '/gps/fix')) {
+foreach ($pair in @(@('/imu', 'sensor_msgs/msg/Imu'), @('/gps/fix', 'sensor_msgs/msg/NavSatFix'))) {
+    $t = $pair[0]
     $f = Convert-ToWslPath (Join-Path $LogDir ('echo_' + ($t.Trim('/') -replace '/', '_') + '.txt'))
-    $hzProcs += Start-WslDetached ('echo_' + ($t.Trim('/') -replace '/', '_')) "timeout 30 ros2 topic echo --once $t > '$f' 2>&1; true"
+    # The type is given explicitly so the subscriber does not depend on graph discovery timing.
+    $hzProcs += Start-WslDetached ('echo_' + ($t.Trim('/') -replace '/', '_')) "timeout 30 ros2 topic echo --once $t $($pair[1]) > '$f' 2>&1; true"
 }
 
 foreach ($h in $hzProcs) { $null = $h.WaitForExit(($HzWindowSec + 30) * 1000) }
