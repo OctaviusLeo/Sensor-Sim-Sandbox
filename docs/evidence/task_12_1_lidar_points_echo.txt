@@ -1,0 +1,24 @@
+# Task 12.1 — lidar PointCloud2 publish evidence (Requirements 3.3, 3.4)
+# Generated: 2026-10-17T10:33:04.0153681-04:00
+# Command: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\run_lidar_publish.ps1
+# Commit:  6159cfb44674ee4d9ddc36efc29560dd01889953
+# Engine:  C:\Program Files (x86)\UE_5.8
+
+## Message built in the editor (frame_id / width / height):
+[2026.10.17-14.32.54:309][  0]LogLidarPublish: LidarPublish built PointCloud2: frame_id='lidar_link' width=5149 height=1 (returns=5149, rays=5760)
+
+## Live `ros2 topic echo --once --no-arr /lidar/points` (WSL):
+header:
+  stamp:
+    sec: 0
+    nanosec: 0
+  frame_id: lidar_link
+height: 1
+width: 5149
+fields: '<sequence type: sensor_msgs/msg/PointField, length: 3>'
+is_bigendian: false
+point_step: 12
+row_step: 61788
+data: '<sequence type: uint8, length: 61788>'
+is_dense: true
+---
