@@ -1,6 +1,6 @@
 # Sensor Sim Sandbox
 
-> This repository is **private** — no public license, no packaging, no public releases.
+> Code is released under the [MIT License](LICENSE). Third-party packages are listed with their licenses in [THIRD_PARTY.md](THIRD_PARTY.md); Unreal Engine and its content are not redistributed. There is no packaging or release.
 
 ## Description
 
