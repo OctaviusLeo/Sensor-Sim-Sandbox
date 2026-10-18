@@ -98,3 +98,24 @@ Thumbs.db
 *~
 .idea/
 .vscode/
+
+# ─────────────────────────────────────────────────────────────
+# Local working files that are not part of this project:
+# the original build prompts, agent working files, the IDE's
+# steering files, and sibling projects that live in their own repos.
+# ─────────────────────────────────────────────────────────────
+*_prompt.md
+portfolio-rules.md
+.agents/
+.kiro/steering/
+.kiro/specs/*/.config.kiro
+.kiro/specs/agent-injection-bench/
+.kiro/specs/autonomy-test-harness/
+.kiro/specs/finetune-and-serve/
+.kiro/specs/grounded-qa-service/
+.kiro/specs/learned-opponents/
+/Learned-Opponents/
+/agent-injection-bench/
+/finetune-and-serve/
+/grounded-qa-service/
+/Autonomy-Test-Harness/
