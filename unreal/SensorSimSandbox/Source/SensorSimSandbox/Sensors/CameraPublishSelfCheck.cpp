@@ -1,4 +1,4 @@
-// Copyright (c) Sensor Sim Sandbox. Private portfolio project.
+// Copyright (c) 2026 OctaviusLeo. MIT License.
 
 #include "Sensors/CameraMessage.h"
 #include "Sensors/CameraModel.h"

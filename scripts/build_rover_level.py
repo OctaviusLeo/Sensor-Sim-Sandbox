@@ -1,4 +1,4 @@
-# Copyright (c) Sensor Sim Sandbox. Private portfolio project.
+# Copyright (c) 2026 OctaviusLeo. MIT License.
 #
 # Headless editor-Python script that creates the minimal /Game/Maps/RoverLevel
 # package WITHOUT the editor UI (design "Level content", Requirement 2.2). The
