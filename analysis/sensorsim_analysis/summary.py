@@ -15,7 +15,15 @@ from pathlib import Path
 
 from .metrics import SensorMetrics
 
-RATE_TARGET_HZ = 10.0
+RATE_TARGET_HZ = 10.0  # used for a topic whose sensor has no configured rate_hz
+
+# Sensor whose configured rate_hz is the target for each published topic.
+TOPIC_SENSOR = {
+    "/lidar/points": "lidar",
+    "/camera/image/compressed": "camera",
+    "/imu": "imu_accel",
+    "/gps/fix": "gps",
+}
 
 
 @dataclass
@@ -35,6 +43,14 @@ def fmt(x: float | int | None, digits: int = 6) -> str:
     if math.isnan(x):
         return "n/a"
     return f"{x:.{digits}f}"
+
+
+def rate_target_hz(topic: str, metrics: dict[str, SensorMetrics]) -> float:
+    """Configured rate of the sensor behind ``topic``; RATE_TARGET_HZ if it has none."""
+    m = metrics.get(TOPIC_SENSOR.get(topic, ""))
+    if m is not None and m.configured_rate_hz:
+        return float(m.configured_rate_hz)
+    return RATE_TARGET_HZ
 
 
 def render_summary(
@@ -83,15 +99,16 @@ def render_summary(
     if rates:
         lines += [
             "",
-            f"## Measured ROS 2 publish rates (target {RATE_TARGET_HZ:.0f} Hz)",
+            "## Measured ROS 2 publish rates (target: each sensor's configured rate)",
             "",
             "| Topic | Measured rate (Hz) | Target (Hz) | Met | Source |",
             "| --- | --- | --- | --- | --- |",
         ]
         for r in rates:
-            met = "n/a" if math.isnan(r.rate_hz) else ("yes" if r.rate_hz >= RATE_TARGET_HZ else "no")
+            target = rate_target_hz(r.topic, metrics)
+            met = "n/a" if math.isnan(r.rate_hz) else ("yes" if r.rate_hz >= target else "no")
             lines.append(
-                f"| `{r.topic}` | {fmt(r.rate_hz, 3)} | {RATE_TARGET_HZ:.0f} | {met} | {r.source} |"
+                f"| `{r.topic}` | {fmt(r.rate_hz, 3)} | {target:g} | {met} | {r.source} |"
             )
     if notes:
         lines += ["", "## Notes", ""] + [f"- {n}" for n in notes]

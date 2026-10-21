@@ -154,6 +154,22 @@ def test_summary_formatting_and_atomic_write(tmp_path):
     assert len(make_plots(metrics, tmp_path / "plots")) == 2
 
 
+def test_summary_rate_target_is_each_topics_configured_rate(tmp_path):
+    imu = [Sample("imu_accel", i, i * 0.02 + 0.02, i * 0.02, i * 0.02 + 0.02, False,
+                  truth=np.zeros(3), published=np.zeros(3)) for i in range(3)]
+    samples = [_lidar(i, i * 0.1, 0.2, [1.0], [1.0]) for i in range(3)] + imu
+    write_run_log(tmp_path / "l.jsonl", {"seed": 3, "commit": "c", "sensor_config": {
+        "lidar": {"rate_hz": 10.0}, "imu_accel": {"rate_hz": 50}}}, samples)
+    metrics = compute_metrics(load_run_log(tmp_path / "l.jsonl"))
+    text = render_summary(metrics, command="cmd", seed=3, commit="c", run_log="l.jsonl",
+                          rates=[RateMeasurement("/lidar/points", 10.2, "bag"),
+                                 RateMeasurement("/imu", 30.698, "bag"),
+                                 RateMeasurement("/gps/fix", 9.5, "bag")])
+    assert "| `/lidar/points` | 10.200 | 10 | yes | bag |" in text
+    assert "| `/imu` | 30.698 | 50 | no | bag |" in text
+    assert "| `/gps/fix` | 9.500 | 10 | no | bag |" in text  # no gps config: 10 Hz default
+
+
 def test_reads_jazzy_sqlite3_bag_recorded_on_host():
     """Proves the pinned rosbags reads a bag written by `ros2 bag record -s sqlite3` (Jazzy, WSL)."""
     bag = load_bag(Path(__file__).parent / "data" / "jazzy_bag")
