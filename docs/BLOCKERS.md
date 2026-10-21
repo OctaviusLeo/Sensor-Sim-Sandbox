@@ -106,7 +106,10 @@ closed. What was fixed (none of it loosened a target or test):
    launched as a detached Windows-side `wsl.exe` process whose lifetime the script controls.
 
 Evidence (option a, all conditions pass): `docs/evidence/compile.log` (`Result: Succeeded`),
-`docs/evidence/editor_open.png`, `docs/evidence/editor_startup.log` (0 `Error:` lines),
+`docs/evidence/editor_startup.log` (0 `Error:` lines; this log is the evidence that the
+editor opened — the screenshot the script took, `editor_open.png`, caught the engine splash
+screen rather than the editor window and was removed; `results/smoke_result.json` still
+names it),
 `docs/evidence/ros2_echo_smoke.txt` (`data: sensor-sim-sandbox`), and
 `results/smoke_result.json` (`chosen_option: a`, every condition `true`). Reproducible
 command recorded in `results/smoke_result.json` and the M0 block of `docs/ENVIRONMENT.md`.

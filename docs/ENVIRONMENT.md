@@ -76,7 +76,7 @@ HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion:
 (winver itself only opens a dialog and prints nothing; the text above is the
 equivalent command-line capture.)
   ```
-- **Editor opens with no error dialog:** see `docs/evidence/editor_open.png` and `docs/evidence/editor_startup.log`
+- **Editor opens with no error dialog:** see `docs/evidence/editor_startup.log` (the screenshot `editor_open.png` caught the engine splash screen rather than the editor window, so it was removed; `results/smoke_result.json` still names it)
 - **C++ project compiles with zero errors:** see `docs/evidence/compile.log`
 - **`ros2 topic echo` receives test message within 10 s:** see `docs/evidence/ros2_echo_smoke.txt`
 - **Per-option first-failing conditions (Requirement 1.5):**
