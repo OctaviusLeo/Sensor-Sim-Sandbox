@@ -140,6 +140,8 @@ flowchart LR
 
 The repository remote is `https://github.com/OctaviusLeo/Sensor-Sim-Sandbox.git` (private until released; no public license or packaging — portfolio rules).
 
+> **Owner decision, 2026-10-21:** the repository was released publicly under the MIT License.
+
 ```
 Sensor-Sim-Sandbox/
 ├── unreal/
