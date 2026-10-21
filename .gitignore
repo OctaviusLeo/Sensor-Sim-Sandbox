@@ -109,6 +109,8 @@ portfolio-rules.md
 .agents/
 .kiro/steering/
 .kiro/specs/*/.config.kiro
+.kiro/specs/*/tasks.meta.json
+.kiro/settings/
 .kiro/specs/agent-injection-bench/
 .kiro/specs/autonomy-test-harness/
 .kiro/specs/finetune-and-serve/
