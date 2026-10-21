@@ -21,9 +21,14 @@ table and provenance [below](#measured-results)):
   dropout **0.099984** vs **0.10** configured; bias -0.000008 m.
 - **IMU / GPS:** accelerometer bias 0.020007 vs 0.02 m/s² and std 0.050033 vs 0.05 m/s²;
   GPS bias 0.305687 vs 0.3 m and std 0.497535 vs 0.5 m.
-- **Not met:** ROS 2 publish rates were **9.330 Hz** (lidar) and **8.963 Hz** (camera)
-  against a 10 Hz target, and latency is one to two game ticks above its configured value.
-  The causes are explained below rather than tuned away.
+- **Not met** (causes explained below rather than tuned away):
+  - Publish rates: **9.330 Hz** (lidar) and **8.963 Hz** (camera) against a 10 Hz target,
+    and the IMU at **30.698 Hz** against **50 Hz** configured.
+  - Camera noise: measured std **3.36** vs σ = **5** configured (about −33 %), with a bias
+    of **1.01** where none is configured. The likely explanation, not separately measured:
+    JPEG compression smooths part of the noise, and clamping to [0, 255] plus 8-bit
+    rounding change the error distribution.
+  - Latency is about 27–31 ms above its configured value for every sensor.
 
 These are point estimates from a single run; the analysis does not compute confidence
 intervals. The statistical tolerances (std within ±10 %, dropout within ±2 pp, latency
@@ -43,8 +48,10 @@ end-to-end run, captured from the game's own viewport by `scripts/run_e2e.ps1`).
   pose, all bound-checked against their configs (an out-of-bound value is rejected, named,
   and the last valid config kept).
 - **Shared seeded pipeline:** each sensor gets its own RNG derived from the run seed and
-  its name, so a run is reproducible per sensor; the latency queue releases a sample at
-  the first tick where `capture_time + latency <= now`.
+  its name, so given the same captured truth the noise and dropout draws are identical per
+  sensor (capture times come from the wall clock, so a whole run is not bit-identical);
+  the latency queue releases a sample at the first tick where
+  `capture_time + latency <= now`.
 - **ROS 2 bridge:** a C++ rosbridge WebSocket client (with reconnect) publishing
   `sensor_msgs/PointCloud2`, `CompressedImage`, `CameraInfo`, `Imu`, `NavSatFix` and
   `tf2_msgs/TFMessage`, with Unreal-to-ROS coordinate conversion per REP 103. No DDS
@@ -154,18 +161,25 @@ The camera error is published JPEG vs truth PNG on sampled frames, so JPEG compr
 smooths part of the injected σ = 5 noise and adds its own error. Achieved rate is
 `(n − 1) / T` over the whole run's `t_publish`.
 
-**ROS 2 publish rates (target 10 Hz, not met in this run):**
+**ROS 2 publish rates (target: each sensor's configured rate; not met in this run):**
 
 - `/lidar/points`: **9.330 Hz** — `ros2 topic hz /lidar/points`, 60 s window (raw output in `runs/<id>/hz/`); seed 1234, commit `f92afce…`.
 - `/camera/image/compressed` at 640×480: **8.963 Hz** — `ros2 topic hz /camera/image/compressed`, 60 s window; seed 1234, commit `f92afce…`.
 - Bag cross-check over the whole run: `/lidar/points` 9.569 Hz, `/camera/image/compressed` 9.104 Hz, `/imu` 30.698 Hz, `/gps/fix` 9.113 Hz.
+- `/imu`: **30.698 Hz** against **50 Hz** configured, so **not met**. The committed
+  [`results/summary.md`](results/summary.md) predates a fix to the analysis's rate check:
+  it compares every topic with 10 Hz and so marks `/imu` as met. The analysis now uses each
+  sensor's configured rate, but the run log behind that summary is not committed, so the
+  summary has not been regenerated.
 
 Causes, reported rather than tuned away:
 - **Dropout:** the camera and GPS publish only the samples that survive their dropout (5 %), so at a 10 Hz capture rate their expected topic rate is 9.5 Hz.
 - **Game-tick capture:** every sensor captures and releases on the game tick, at most once per tick. Frame-time hitches (scene-capture readback, demo screenshots after t = 100 s, host load) therefore delay captures. This run averaged 26 ms per frame, so the IMU (configured 50 Hz) got about 31 Hz.
-- **Host load:** the same code measured higher on a less loaded host. Commit `aa625bf` (13 ms average frame time) got lidar 9.997 Hz / camera 9.640 Hz; commit `724ce26` (18 ms) got lidar 10.044 Hz / camera 9.669 Hz. See [`docs/evidence/gate_a.md`](docs/evidence/gate_a.md) and [`docs/evidence/m5.md`](docs/evidence/m5.md).
+- **Host load:** the same pipeline at earlier commits measured higher on a less loaded host. Commit `aa625bf` (13 ms average frame time) got lidar 9.997 Hz / camera 9.640 Hz; commit `724ce26` (18 ms) got lidar 10.044 Hz / camera 9.669 Hz. See [`docs/evidence/gate_a.md`](docs/evidence/gate_a.md) and [`docs/evidence/m5.md`](docs/evidence/m5.md).
 
-Latency runs 15–30 ms (one to two game ticks) above the configured value. The queue is checked once per tick, so the release error lies in `[0, dt)`; at a 26 ms average tick the lidar and camera are 15 % over their 200 ms target, inside ±20 %. The IMU (20 ms target) and GPS (100 ms) are well outside ±20 % because one tick is a large fraction of their latency.
+Latency is `t_publish − t_capture` on the simulator's queue clock, so it is measured
+inside the sim, before JSON serialization, WebSocket and rosbridge transport. It runs
+about 27–31 ms above the configured value (lidar +31.0 ms, camera +30.8 ms). The queue is checked once per tick, so the release error lies in `[0, dt)`; at a 26 ms average tick the lidar and camera are 15 % over their 200 ms target, inside ±20 %. The IMU (20 ms target) and GPS (100 ms) are well outside ±20 % because one tick is a large fraction of their latency.
 
 Plots: [`results/lidar_error_hist.png`](results/lidar_error_hist.png),
 [`results/camera_error_hist.png`](results/camera_error_hist.png),
@@ -217,8 +231,8 @@ Pass `-EnginePath` to point at a different UE 5.8 install (default
 
 ## Known limitations
 
-- Publish rates fall short of 10 Hz (see above); captures run on the game tick, so the
-  rate depends on frame time and host load.
+- Publish rates fall short of their targets (10 Hz lidar and camera, 50 Hz IMU; see
+  above); captures run on the game tick, so the rate depends on frame time and host load.
 - Latency resolution is one game tick, so short configured latencies (IMU 20 ms, GPS
   100 ms) come out well above target, outside ±20 %.
 - The IMU truth comes from finite differences of the rover pose per tick. GPS uses a
@@ -232,6 +246,19 @@ Pass `-EnginePath` to point at a different UE 5.8 install (default
   end-to-end run are run locally.
 - Raw run logs and bags live under `runs/` and are not committed; only the generated
   summary and plots are.
+- Matching the configured std validates the noise pipeline and the logging, not sensor
+  physics: the noise models are simple Gaussian, dropout and fixed-latency models, not
+  fitted to real sensors.
+- End-to-end transport latency (Unreal → rosbridge → ROS 2 subscriber) is not measured;
+  the reported latency stops at the simulator's release queue.
+- Two C++ issues found in review are recorded here rather than fixed, because no Unreal
+  build was possible when they were found:
+  - The camera has a second latency queue that is filled but never drained
+    (`Sensors/CameraModel.cpp` enqueues into the runner's queue, while
+    `Run/SensorRunManager.cpp` publishes from its own `CameraQueue`).
+  - `WallStartSeconds` in `Run/SensorRunManager.cpp` calls `FDateTime::UtcNow()` twice
+    (once for the seconds, once for the milliseconds), so the wall-clock stamp base can be
+    off by up to 1 s if the second changes between the calls.
 
 ## Reproducibility
 
