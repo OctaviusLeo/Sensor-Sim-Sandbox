@@ -5,7 +5,10 @@ Every third-party package or asset added to this repository is recorded here wit
 dependency is checked before it is added; content whose license forbids redistribution
 is not committed (portfolio rules).
 
-> This repository is **private** — no public license, no packaging, no public releases.
+> The project's own code is under the [MIT License](LICENSE). There is no packaging or
+> release. Unreal Engine 5.8, ROS 2 Jazzy and `rosbridge_suite` are required tools, not
+> redistributed here; the committed level (`RoverLevel.umap`) uses only engine basic
+> shapes and spawns its content from `config/level.yaml`.
 
 | Name | Version | License identifier |
 | --- | --- | --- |
