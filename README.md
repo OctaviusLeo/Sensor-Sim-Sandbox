@@ -145,7 +145,7 @@ wsl -d Ubuntu -- bash -lc "source /opt/ros/jazzy/setup.bash && rviz2"   # fixed 
 
 Copied from the generated [`results/summary.md`](results/summary.md) (never hand-edited).
 Command `pwsh -NoProfile -File scripts\run_e2e.ps1 -SkipBuild`, seed **1234**, commit
-**`f92afce57feadb4e9ae74804bd2850f8119701ca`**, run `e2e_20261017_182940` (210.0 s;
+**`a9bb4c9091aaabd5ad344a5ba8bcf7076402849c`**, run `e2e_20261017_182940` (210.0 s;
 2,000 lidar scans; 2,000 camera frames, 97 dropped; IMU and GPS enabled; average frame
 time 26.223 ms).
 
@@ -163,8 +163,8 @@ smooths part of the injected σ = 5 noise and adds its own error. Achieved rate 
 
 **ROS 2 publish rates (target: each sensor's configured rate; not met in this run):**
 
-- `/lidar/points`: **9.330 Hz** — `ros2 topic hz /lidar/points`, 60 s window (raw output in `runs/<id>/hz/`); seed 1234, commit `f92afce…`.
-- `/camera/image/compressed` at 640×480: **8.963 Hz** — `ros2 topic hz /camera/image/compressed`, 60 s window; seed 1234, commit `f92afce…`.
+- `/lidar/points`: **9.330 Hz** — `ros2 topic hz /lidar/points`, 60 s window (raw output in `runs/<id>/hz/`); seed 1234, commit `a9bb4c9…`.
+- `/camera/image/compressed` at 640×480: **8.963 Hz** — `ros2 topic hz /camera/image/compressed`, 60 s window; seed 1234, commit `a9bb4c9…`.
 - Bag cross-check over the whole run: `/lidar/points` 9.569 Hz, `/camera/image/compressed` 9.104 Hz, `/imu` 30.698 Hz, `/gps/fix` 9.113 Hz.
 - `/imu`: **30.698 Hz** against **50 Hz** configured, so **not met**. The committed
   [`results/summary.md`](results/summary.md) predates a fix to the analysis's rate check:
@@ -175,7 +175,7 @@ smooths part of the injected σ = 5 noise and adds its own error. Achieved rate 
 Causes, reported rather than tuned away:
 - **Dropout:** the camera and GPS publish only the samples that survive their dropout (5 %), so at a 10 Hz capture rate their expected topic rate is 9.5 Hz.
 - **Game-tick capture:** every sensor captures and releases on the game tick, at most once per tick. Frame-time hitches (scene-capture readback, demo screenshots after t = 100 s, host load) therefore delay captures. This run averaged 26 ms per frame, so the IMU (configured 50 Hz) got about 31 Hz.
-- **Host load:** the same pipeline at earlier commits measured higher on a less loaded host. Commit `aa625bf` (13 ms average frame time) got lidar 9.997 Hz / camera 9.640 Hz; commit `724ce26` (18 ms) got lidar 10.044 Hz / camera 9.669 Hz. See [`docs/evidence/gate_a.md`](docs/evidence/gate_a.md) and [`docs/evidence/m5.md`](docs/evidence/m5.md).
+- **Host load:** the same pipeline at earlier commits measured higher on a less loaded host. Commit `89594dd` (13 ms average frame time) got lidar 9.997 Hz / camera 9.640 Hz; commit `fc1f445` (18 ms) got lidar 10.044 Hz / camera 9.669 Hz. See [`docs/evidence/gate_a.md`](docs/evidence/gate_a.md) and [`docs/evidence/m5.md`](docs/evidence/m5.md).
 
 Latency is `t_publish − t_capture` on the simulator's queue clock, so it is measured
 inside the sim, before JSON serialization, WebSocket and rosbridge transport. It runs
