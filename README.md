@@ -197,6 +197,9 @@ every push and pull request:
 .\.venv\Scripts\python -m pytest analysis/tests
 ```
 
+CI also lints the analysis with `ruff check analysis` (rules in `analysis/ruff.toml`, ruff
+version pinned in `.github/workflows/ci-sensor-sim-sandbox.yml`).
+
 **Unreal Automation tests (headless, needs a local UE 5.8 install).**
 `scripts/run_ue_tests.ps1` builds the editor target, then runs every project test (all
 registered under the `SensorSimSandbox.` prefix) headless and exits 0 only when every

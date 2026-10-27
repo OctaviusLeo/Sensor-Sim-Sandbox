@@ -1,5 +1,6 @@
-# Sensor Sim Sandbox — analysis pytest suite (Requirements 9.3, 9.4, 9.5).
+# Sensor Sim Sandbox — analysis lint and pytest suite (Requirements 9.3, 9.4, 9.5).
 # Unreal Automation tests need UE5 + a GPU and run locally via scripts/run_ue_tests.ps1.
+# Actions are pinned to full commit SHAs (tag in the trailing comment); Dependabot bumps them.
 name: ci-sensor-sim-sandbox
 
 on:
@@ -7,14 +8,42 @@ on:
     branches: ["**"]
   pull_request:
 
+permissions:
+  contents: read
+
+# Cancel superseded runs on branches and pull requests; every master run completes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 jobs:
-  pytest:
+  lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
+      - name: Install ruff
+        run: python -m pip install ruff==0.17.3
+      - name: Run ruff (rules in analysis/ruff.toml)
+        run: ruff check --output-format github analysis
+
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: analysis/requirements.txt
       - name: Install analysis dependencies
         run: python -m pip install -r analysis/requirements.txt
       - name: Run pytest
