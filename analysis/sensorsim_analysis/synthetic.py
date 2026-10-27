@@ -93,13 +93,18 @@ def lidar_meta(inj: Injected, seed: int) -> dict:
     }
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("out")
-    ap.add_argument("--seed", type=int, default=1234)
-    a = ap.parse_args()
+def main(argv: list[str] | None = None) -> None:
     # Gate A lidar values, 3,601+ rays per dropout check (design "Sample sizes").
     inj = Injected(bias=0.0, sigma=0.02, dropout=0.10, latency_s=0.2, rays=5760, scans=20)
+    ap = argparse.ArgumentParser(
+        prog="python -m sensorsim_analysis.synthetic",
+        description=f"Write a synthetic lidar Run_Log with known injected errors "
+        f"(sigma {inj.sigma} m, dropout {inj.dropout}, latency {inj.latency_s * 1000:g} ms; "
+        f"{inj.scans} scans of {inj.rays} rays) to check that analyze.py recovers them.",
+    )
+    ap.add_argument("out", help="Run_Log JSONL path to write (parent folders are created)")
+    ap.add_argument("--seed", type=int, default=1234, help="RNG seed (default: %(default)s)")
+    a = ap.parse_args(argv)
     write_run_log(Path(a.out), lidar_meta(inj, a.seed), make_lidar_samples(inj, a.seed))
     print(f"wrote {a.out}: {inj}")
 

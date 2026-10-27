@@ -60,12 +60,24 @@ def _topic_file(hz_dir: Path, topic: str) -> Path:
 
 
 def run(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[1])
-    ap.add_argument("--run", required=True, help="run config YAML (config/run.yaml)")
-    ap.add_argument("--log", help="Run_Log path (overrides run_log in the run config)")
-    ap.add_argument("--bag", help="rosbag2 folder (overrides bag in the run config)")
-    ap.add_argument("--hz-dir", help="folder of raw `ros2 topic hz` captures")
-    ap.add_argument("--out", help="output folder (overrides output_dir)")
+    ap = argparse.ArgumentParser(
+        prog="analyze.py",
+        description="Measure each sensor's bias, std, RMSE, dropout, latency and publish rate "
+        "from a Run_Log against its configured values, then write summary.md and error plots.",
+        epilog="Exit status: 0 on success; 2 on missing or unparsable input, in which case "
+        "no summary.md is written.",
+    )
+    ap.add_argument("--run", required=True,
+                    help="run config YAML, e.g. config/run.yaml; supplies run_log, bag, "
+                    "topic_hz_dir and output_dir")
+    ap.add_argument("--log", help="Run_Log JSONL (overrides run_log in the run config)")
+    ap.add_argument("--bag", help="rosbag2 folder for the rate cross-check (overrides bag in the "
+                    "run config; when given here it must exist)")
+    ap.add_argument("--hz-dir", help="folder of raw `ros2 topic hz` captures named after each "
+                    "topic, e.g. lidar_points.txt (overrides topic_hz_dir; when given here "
+                    "every topic's capture must exist)")
+    ap.add_argument("--out", help="output folder for summary.md and plots (overrides output_dir; "
+                    "default results)")
     args = ap.parse_args(argv)
 
     command = "python analysis/analyze.py " + " ".join(

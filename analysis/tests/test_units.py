@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
+from sensorsim_analysis import synthetic
 from sensorsim_analysis.loaders import AnalysisInputError, Sample, load_bag, load_run_log, write_run_log
 from sensorsim_analysis.metrics import compute_metrics
 from sensorsim_analysis.plots import make_plots
@@ -176,3 +177,25 @@ def test_reads_jazzy_sqlite3_bag_recorded_on_host():
     assert bag.count("/fixture") >= 10
     stamps = bag.timestamps_ns["/fixture"]
     assert stamps == sorted(stamps)
+
+
+def test_cli_help_describes_the_tool(capsys):
+    with pytest.raises(SystemExit) as exc:
+        analyze.run(["--help"])
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    assert "bias, std, RMSE" in out and "Exit status" in out
+
+
+def test_synthetic_quickstart_recovers_injected_lidar_errors(tmp_path):
+    """The README's CPU-only quickstart: synthetic Run_Log -> analyze.py -> summary.md."""
+    log = tmp_path / "run_log.jsonl"
+    synthetic.main([str(log)])
+    run_yaml = tmp_path / "run.yaml"
+    run_yaml.write_text("seed: 1234\n")  # hermetic: no bag or topic hz inputs
+    assert analyze.run(["--run", str(run_yaml), "--log", str(log), "--out", str(tmp_path / "out")]) == 0
+    assert "| lidar |" in (tmp_path / "out" / "summary.md").read_text(encoding="utf-8")
+    m = compute_metrics(load_run_log(log))["lidar"]
+    assert m.std == pytest.approx(0.02, rel=0.05)
+    assert m.measured_dropout == pytest.approx(0.10, abs=0.01)
+    assert m.measured_latency_ms == pytest.approx(200.0)
