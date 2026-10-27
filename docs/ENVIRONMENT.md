@@ -118,11 +118,11 @@ equivalent command-line capture.)
 | GitHub CLI | 2.102.0 (2026-09-30) | `gh --version` → `gh version 2.102.0 (2026-09-30)` |
 | FFmpeg | N-118205-gd3aa99a4f4-20250101 | `ffmpeg -version` → `ffmpeg version N-118205-gd3aa99a4f4-20250101` |
 | pytest | 9.1.1 | `.\.venv\Scripts\python -m pip freeze` → `pytest==9.1.1` |
-| Hypothesis | 6.170.1 | `.\.venv\Scripts\python -m pip freeze` → `hypothesis==6.170.1` |
+| Hypothesis | 6.170.9 | `.\.venv\Scripts\python -m pip freeze` → `hypothesis==6.170.9` |
 | NumPy | 2.5.4 | `.\.venv\Scripts\python -m pip freeze` → `numpy==2.5.4` |
 | matplotlib | 3.11.2 | `.\.venv\Scripts\python -m pip freeze` → `matplotlib==3.11.2` |
 | PyYAML | 6.0.3 | `.\.venv\Scripts\python -m pip freeze` → `PyYAML==6.0.3` |
-| rosbags / ros2 bag reader | 0.11.8 | `.\.venv\Scripts\python -m pip freeze` → `rosbags==0.11.8` |
+| rosbags / ros2 bag reader | 0.11.9 | `.\.venv\Scripts\python -m pip freeze` → `rosbags==0.11.9` |
 | Pillow | 13.0.0 | `.\.venv\Scripts\python -m pip freeze` → `pillow==13.0.0` |
 | Python (Windows .venv) | 3.12.10 | `py -3.12 --version` → `Python 3.12.10` |
 

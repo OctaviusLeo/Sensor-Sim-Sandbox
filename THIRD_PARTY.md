@@ -15,8 +15,8 @@ is not committed (portfolio rules).
 | numpy | 2.5.4 | BSD-3-Clause (bundled 0BSD, MIT, Zlib, CC0-1.0) |
 | matplotlib | 3.11.2 | PSF-based matplotlib license |
 | PyYAML | 6.0.3 | MIT |
-| rosbags | 0.11.8 | Apache-2.0 |
+| rosbags | 0.11.9 | Apache-2.0 |
 | Pillow | 13.0.0 | MIT-CMU |
 | pytest | 9.1.1 | MIT |
-| Hypothesis | 6.170.1 | MPL-2.0 |
+| Hypothesis | 6.170.9 | MPL-2.0 |
 
