@@ -1,5 +1,8 @@
 # Sensor Sim Sandbox
 
+[![CI](https://github.com/OctaviusLeo/Sensor-Sim-Sandbox/actions/workflows/ci-sensor-sim-sandbox.yml/badge.svg?branch=master)](https://github.com/OctaviusLeo/Sensor-Sim-Sandbox/actions/workflows/ci-sensor-sim-sandbox.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A drivable Unreal Engine 5.8 rover with simulated **lidar** (raycast, 16 × 360 rays per
 scan), **camera** (scene capture, 640×480 JPEG), **IMU** and **GPS**. All four sensors run
 through one shared, seeded pipeline (Gaussian noise → dropout → latency queue) and stream
