@@ -52,7 +52,7 @@ def plot_configured_vs_measured(metrics: dict[str, SensorMetrics], out_dir: Path
         ("rate (Hz)", [_nan0(metrics[n].configured_rate_hz) for n in names],
          [_nan0(metrics[n].achieved_rate_hz) for n in names]),
     ]
-    for ax, (title, cfg, meas) in zip(axes, pairs):
+    for ax, (title, cfg, meas) in zip(axes, pairs, strict=True):
         ax.bar(x - 0.2, cfg, 0.4, label="configured", color="#999999")
         ax.bar(x + 0.2, meas, 0.4, label="measured", color="#4c72b0")
         ax.set_xticks(x, names)

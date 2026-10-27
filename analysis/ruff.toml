@@ -1,0 +1,12 @@
+# Lint rules for the analysis tool; CI runs `ruff check analysis` with a pinned ruff.
+# The rule set is explicit so a ruff upgrade cannot silently change what CI enforces.
+target-version = "py312"
+
+[lint]
+select = [
+    "E4", "E7", "E9",  # pycodestyle errors (imports, statements, syntax)
+    "F",               # pyflakes: unused imports and names, undefined names
+    "B",               # flake8-bugbear: likely bugs
+    "UP",              # pyupgrade: syntax for the supported Python version
+    "ISC",             # implicit string concatenation (a missing comma in a list)
+]

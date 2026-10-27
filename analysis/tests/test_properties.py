@@ -17,7 +17,7 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from sensorsim_analysis.loaders import AnalysisInputError, Sample, load_run_log, write_run_log
+from sensorsim_analysis.loaders import Sample, load_run_log, write_run_log
 from sensorsim_analysis.metrics import achieved_rate_hz, compute_metrics
 from sensorsim_analysis.summary import render_summary
 from sensorsim_analysis.synthetic import Injected, lidar_meta, make_lidar_samples
@@ -76,7 +76,7 @@ def test_property9_run_log_round_trip(samples, seed):
         log = load_run_log(d / "log.jsonl")
         assert log.meta == {"type": "run_meta", **meta}
         assert len(log.samples) == len(samples)
-        for a, b in zip(samples, log.samples):
+        for a, b in zip(samples, log.samples, strict=True):
             assert (a.sensor, a.seq, a.t, a.t_capture, a.t_publish, a.dropped) == (
                 b.sensor, b.seq, b.t, b.t_capture, b.t_publish, b.dropped)
             for x, y in ((a.truth, b.truth), (a.published, b.published)):

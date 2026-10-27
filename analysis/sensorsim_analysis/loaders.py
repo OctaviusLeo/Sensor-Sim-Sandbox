@@ -13,9 +13,10 @@ from __future__ import annotations
 
 import json
 import math
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any
 
 import numpy as np
 

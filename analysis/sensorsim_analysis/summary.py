@@ -75,9 +75,11 @@ def render_summary(
         "",
         "## Per-sensor metrics",
         "",
-        "| Sensor | Bias | Configured bias | Std | RMSE | Error samples | Configured noise σ "
-        "| Measured dropout | Configured dropout | Measured latency (ms) "
-        "| Configured latency (ms) | Achieved rate (Hz) | Published |",
+        (
+            "| Sensor | Bias | Configured bias | Std | RMSE | Error samples | Configured noise σ "
+            "| Measured dropout | Configured dropout | Measured latency (ms) "
+            "| Configured latency (ms) | Achieved rate (Hz) | Published |"
+        ),
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for name in sorted(metrics):
@@ -91,10 +93,12 @@ def render_summary(
         )
     lines += [
         "",
-        "Units: lidar and gps error in meters, imu_accel in m/s², imu_gyro in rad/s, "
-        "camera error in 8-bit intensity levels "
-        "(sampled frames, published JPEG vs truth PNG, so JPEG compression error is included). "
-        "Rate is `(n - 1) / T` over `t_publish`.",
+        (
+            "Units: lidar and gps error in meters, imu_accel in m/s², imu_gyro in rad/s, "
+            "camera error in 8-bit intensity levels "
+            "(sampled frames, published JPEG vs truth PNG, so JPEG compression error is included). "
+            "Rate is `(n - 1) / T` over `t_publish`."
+        ),
     ]
     if rates:
         lines += [
