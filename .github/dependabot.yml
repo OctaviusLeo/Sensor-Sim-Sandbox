@@ -1,0 +1,19 @@
+# Weekly version-update pull requests, one grouped PR per ecosystem.
+# A pip update must also update the version listed in THIRD_PARTY.md before it is merged.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: pip
+    directory: /analysis
+    schedule:
+      interval: weekly
+    groups:
+      analysis-requirements:
+        patterns: ["*"]
