@@ -20,3 +20,14 @@ is not committed (portfolio rules).
 | pytest | 9.1.1 | MIT |
 | Hypothesis | 6.170.9 | MPL-2.0 |
 
+## GitHub Actions (CI only, `.github/workflows/ci-sensor-sim-sandbox.yml`)
+
+These run on GitHub's hosted runners for the lint and the analysis tests; none of them is
+part of the analysis environment above. Licenses were read from each repository's
+`LICENSE` and from PyPI.
+
+| Name | Version | License identifier |
+| --- | --- | --- |
+| actions/checkout | v7.0.1 (`3d3c42e5aac5ba805825da76410c181273ba90b1`) | MIT (github.com/actions/checkout LICENSE) |
+| actions/setup-python | v7.1.0 (`6d4fd22b20465ccc0f7354476588e8df7c9ca0e0`) | MIT (github.com/actions/setup-python LICENSE) |
+| Ruff (`pip install ruff==0.17.3` in the lint job; also the lint command in `CONTRIBUTING.md`) | 0.17.3 | MIT (PyPI metadata for 0.17.3: License-Expression MIT) |
