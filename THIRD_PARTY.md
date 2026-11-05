@@ -17,8 +17,8 @@ is not committed (portfolio rules).
 | PyYAML | 6.0.3 | MIT |
 | rosbags | 0.11.9 | Apache-2.0 |
 | Pillow | 13.0.0 | MIT-CMU |
-| pytest | 9.1.1 | MIT |
-| Hypothesis | 6.170.9 | MPL-2.0 |
+| pytest | 9.2.0 | MIT |
+| Hypothesis | 6.170.14 | MPL-2.0 |
 
 ## GitHub Actions (CI only, `.github/workflows/ci-sensor-sim-sandbox.yml`)
 
