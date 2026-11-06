@@ -201,7 +201,8 @@ every push and pull request:
 ```
 
 CI also lints the analysis with `ruff check analysis` (rules in `analysis/ruff.toml`, ruff
-version pinned in `.github/workflows/ci-sensor-sim-sandbox.yml`).
+version pinned in `.github/workflows/ci-sensor-sim-sandbox.yml`). [CONTRIBUTING.md](CONTRIBUTING.md)
+lists the exact pre-commit commands and the procedure for dependency bumps.
 
 **Unreal Automation tests (headless, needs a local UE 5.8 install).**
 `scripts/run_ue_tests.ps1` builds the editor target, then runs every project test (all
