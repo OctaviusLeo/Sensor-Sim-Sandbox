@@ -128,6 +128,20 @@ equivalent command-line capture.)
 
 ---
 
+## CI (GitHub Actions)
+
+These run only on GitHub's hosted runners (`.github/workflows/ci-sensor-sim-sandbox.yml`),
+not on this host. The analysis pins above are installed from `analysis/requirements.txt`.
+
+| Component | Exact version | Verifiable artifact (query / docs ref / passing test) |
+| --- | --- | --- |
+| actions/checkout | v7.0.1 (`3d3c42e5aac5ba805825da76410c181273ba90b1`) | `gh api repos/actions/checkout/commits/v7.0.1 --jq .sha` → the pinned SHA |
+| actions/setup-python | v7.1.0 (`6d4fd22b20465ccc0f7354476588e8df7c9ca0e0`) | `gh api repos/actions/setup-python/commits/v7.1.0 --jq .sha` → the pinned SHA |
+| Python (CI) | 3.12 (latest patch on the runner) | `python-version: "3.12"` in both jobs |
+| Ruff | 0.17.3 | `pip install ruff==0.17.3` in the lint job; `ruff check analysis` passes locally with the same version |
+
+---
+
 ## Reproducibility note
 
 Every number reported anywhere in this repository comes from a repository script and
