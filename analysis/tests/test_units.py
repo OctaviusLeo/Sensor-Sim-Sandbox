@@ -199,3 +199,12 @@ def test_synthetic_quickstart_recovers_injected_lidar_errors(tmp_path):
     assert m.std == pytest.approx(0.02, rel=0.05)
     assert m.measured_dropout == pytest.approx(0.10, abs=0.01)
     assert m.measured_latency_ms == pytest.approx(200.0)
+
+
+def test_topic_hz_capture_errors_name_the_file(tmp_path):
+    no_rate = tmp_path / "lidar_points.txt"
+    no_rate.write_text("WARNING: topic [/lidar/points] does not appear to be published yet\n")
+    with pytest.raises(AnalysisInputError, match="no 'average rate' line: .*lidar_points.txt"):
+        analyze.parse_topic_hz(no_rate)
+    with pytest.raises(AnalysisInputError, match="topic hz capture unreadable: .*missing.txt"):
+        analyze.parse_topic_hz(tmp_path / "missing.txt")
