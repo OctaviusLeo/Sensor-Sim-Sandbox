@@ -11,7 +11,7 @@ from PIL import Image
 
 from sensorsim_analysis import synthetic
 from sensorsim_analysis.loaders import AnalysisInputError, Sample, load_bag, load_run_log, write_run_log
-from sensorsim_analysis.metrics import compute_metrics
+from sensorsim_analysis.metrics import achieved_rate_hz, compute_metrics
 from sensorsim_analysis.plots import make_plots
 from sensorsim_analysis.summary import RateMeasurement, render_summary, write_summary
 
@@ -208,3 +208,13 @@ def test_topic_hz_capture_errors_name_the_file(tmp_path):
         analyze.parse_topic_hz(no_rate)
     with pytest.raises(AnalysisInputError, match="topic hz capture unreadable: .*missing.txt"):
         analyze.parse_topic_hz(tmp_path / "missing.txt")
+
+
+def test_topic_file_maps_topic_name_to_capture_file(tmp_path):
+    assert analyze._topic_file(tmp_path, "/lidar/points") == tmp_path / "lidar_points.txt"
+    assert analyze._topic_file(tmp_path, "camera/image_raw/") == tmp_path / "camera_image_raw.txt"
+
+
+@pytest.mark.parametrize("times", [[], [1.0], [2.0, 2.0, 2.0]])
+def test_achieved_rate_is_nan_when_undefined(times):
+    assert math.isnan(achieved_rate_hz(times))
