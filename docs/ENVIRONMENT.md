@@ -118,7 +118,7 @@ equivalent command-line capture.)
 | GitHub CLI | 2.102.0 (2026-09-30) | `gh --version` → `gh version 2.102.0 (2026-09-30)` |
 | FFmpeg | N-118205-gd3aa99a4f4-20250101 | `ffmpeg -version` → `ffmpeg version N-118205-gd3aa99a4f4-20250101` |
 | pytest | 9.2.0 | `.\.venv\Scripts\python -m pip freeze` → `pytest==9.2.0` |
-| Hypothesis | 6.170.14 | `.\.venv\Scripts\python -m pip freeze` → `hypothesis==6.170.14` |
+| Hypothesis | 6.170.15 | `.\.venv\Scripts\python -m pip freeze` → `hypothesis==6.170.15` |
 | NumPy | 2.5.4 | `.\.venv\Scripts\python -m pip freeze` → `numpy==2.5.4` |
 | matplotlib | 3.11.2 | `.\.venv\Scripts\python -m pip freeze` → `matplotlib==3.11.2` |
 | PyYAML | 6.0.3 | `.\.venv\Scripts\python -m pip freeze` → `PyYAML==6.0.3` |
